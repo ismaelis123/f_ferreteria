@@ -1,0 +1,67 @@
+/* Estilos originales del navbar */
+.color-navbar {
+  background-color: #FF3CAC;
+  background-image: linear-gradient(225deg, #FF3CAC 0%, #784BA0 50%, #2B86C5 100%);
+}
+
+.color-texto-marca {
+  color: #1e3d87 !important;
+}
+
+.margen-superior-main {
+  margin-top: 60px;
+}
+
+/* Fondo general de la página */
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%); /* Degradado suave */
+  font-family: Arial, sans-serif;
+  position: relative; /* Para posicionar formas */
+  min-height: 100vh;
+}
+
+/* Contenedor principal */
+main {
+  position: relative;
+  z-index: 1; /* Contenido sobre las formas */
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Estilo para el contenedor de contenido */
+.content {
+  background: rgba(255, 255, 255, 0.8); /* Fondo semi-transparente */
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para las formas SVG */
+.tool-shape {
+  position: absolute;
+  fill: none;
+  stroke: #6c757d; /* Gris metálico */
+  stroke-width: 2;
+  opacity: 0.3; /* Semi-transparente para minimalismo */
+  z-index: 0; /* Detrás del contenido */
+}
+
+/* Posiciones específicas para cada forma */
+#hammer {
+  top: 100px;
+  left: 50px;
+  transform: rotate(-20deg);
+}
+
+#screwdriver {
+  top: 300px;
+  right: 50px;
+  transform: rotate(30deg);
+}
+
+#nut {
+  bottom: 100px;
+  left: 150px;
+}
