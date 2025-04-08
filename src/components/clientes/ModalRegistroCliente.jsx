@@ -1,4 +1,3 @@
-// ModalRegistroCliente.jsx
 import React from "react";
 import { Modal, Form, Button } from "react-bootstrap";
 
@@ -8,12 +7,15 @@ const ModalRegistroCliente = ({
   nuevoCliente,
   manejarCambioInput,
   agregarCliente,
+  actualizarCliente, // Nueva función para actualizar
+  eliminarCliente,
   errorCarga,
+  esEdicion // Indica si el modal está en modo edición
 }) => {
   return (
     <Modal show={mostrarModal} onHide={() => setMostrarModal(false)}>
       <Modal.Header closeButton>
-        <Modal.Title>Agregar Nuevo Cliente</Modal.Title>
+        <Modal.Title>{esEdicion ? "Actualizar Cliente" : "Agregar Nuevo Cliente"}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
@@ -113,9 +115,15 @@ const ModalRegistroCliente = ({
         <Button variant="secondary" onClick={() => setMostrarModal(false)}>
           Cancelar
         </Button>
-        <Button variant="primary" onClick={agregarCliente}>
-          Guardar Cliente
-        </Button>
+        {esEdicion ? (
+          <Button variant="warning" onClick={actualizarCliente}>
+            Actualizar Cliente
+          </Button>
+        ) : (
+          <Button variant="primary" onClick={agregarCliente}>
+            Guardar Cliente
+          </Button>
+        )}
       </Modal.Footer>
     </Modal>
   );

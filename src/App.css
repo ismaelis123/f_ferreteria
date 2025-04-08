@@ -15,16 +15,16 @@
 /* Fondo general de la página */
 body {
   margin: 0;
-  background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%); /* Degradado suave */
+  background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
   font-family: Arial, sans-serif;
-  position: relative; /* Para posicionar formas */
+  position: relative;
   min-height: 100vh;
 }
 
 /* Contenedor principal */
 main {
   position: relative;
-  z-index: 1; /* Contenido sobre las formas */
+  z-index: 1;
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
@@ -32,23 +32,62 @@ main {
 
 /* Estilo para el contenedor de contenido */
 .content {
-  background: rgba(255, 255, 255, 0.8); /* Fondo semi-transparente */
+  background: rgba(255, 255, 255, 0.8);
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para la tabla */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px; /* Reducido para que se vea más compacto */
+}
+
+table th, table td {
+  padding: 5px 10px; /* Reducido para que ocupe menos espacio */
+  text-align: left;
+}
+
+table th {
+  background-color: #f1f1f1;
+}
+
+table td {
+  background-color: #f9f9f9;
+}
+
+/* Estilo para botones */
+.btn {
+  padding: 5px 10px; /* Reducido */
+  font-size: 12px; /* Reducido */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 2px;
+}
+
+.btn-actualizar {
+  background-color: #FFC107; /* Amarillo */
+  color: black;
+}
+
+.btn-eliminar {
+  background-color: #DC3545; /* Rojo */
+  color: white;
 }
 
 /* Estilos para las formas SVG */
 .tool-shape {
   position: absolute;
   fill: none;
-  stroke: #6c757d; /* Gris metálico */
+  stroke: #6c757d;
   stroke-width: 2;
-  opacity: 0.3; /* Semi-transparente para minimalismo */
-  z-index: 0; /* Detrás del contenido */
+  opacity: 0.3;
+  z-index: 0;
 }
 
-/* Posiciones específicas para cada forma */
 #hammer {
   top: 100px;
   left: 50px;
@@ -65,3 +104,42 @@ main {
   bottom: 100px;
   left: 150px;
 }
+
+/* Estilo para la barra de búsqueda */
+.input-busqueda {
+  width: 180px; /* Establece un tamaño más pequeño para la barra de búsqueda */
+  padding: 5px 8px; /* Ajuste para que el padding sea más compacto */
+  font-size: 14px; /* Tamaño de fuente más pequeño */
+  border-radius: 5px; /* Bordes redondeados */
+  border: 1px solid #ccc; /* Color de borde más suave */
+}
+
+/* Barra de búsqueda con icono a la derecha */
+.input-group {
+  max-width: 250px; /* Ajusta el ancho de la barra */
+  margin: 10px 0;   /* Espaciado encima y debajo para mantener separación */
+}
+
+.input-group-text {
+  background-color: #f1f1f1;
+  border-left: none; /* Elimina el borde entre el icono y el input */
+}
+
+.form-control {
+  padding: 5px 10px;  /* Ajuste del padding para que la barra sea más pequeña */
+  font-size: 14px;     /* Ajuste del tamaño de la fuente */
+  border-right: none;  /* Elimina el borde entre el input y el icono */
+  border-radius: 5px 0 0 5px; /* Bordes redondeados solo al lado izquierdo */
+}
+
+/* Ajustar el icono a la derecha */
+.input-group .input-group-text {
+  border-radius: 0 5px 5px 0; /* Bordes redondeados solo al lado derecho */
+}
+
+/* Estilo para los iconos en los botones de acción */
+.btn i {
+  margin-right: 5px;
+}
+
+/* Estilo para*
