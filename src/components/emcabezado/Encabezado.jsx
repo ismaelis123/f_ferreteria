@@ -3,7 +3,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Container, Nav, Navbar, Offcanvas } from "react-bootstrap";
 import logo from "/vite.svg"; // Importación del logo de la ferretería
 import "bootstrap-icons/font/bootstrap-icons.css"; // Importación de íconos de Bootstrap
-import "../../../App.css";
+import "../../App.css";
+
 // Estilos personalizados de la aplicación
 
 const Encabezado = () => {
@@ -47,7 +48,7 @@ const Encabezado = () => {
           style={{ cursor: "pointer" }}
         >
           <img alt="" src={logo} width="30" height="30" className="d-inline-block align-top" />{" "}
-          <strong>Ferretería Yusii</strong>
+          <strong>Ferretería Selva</strong>
         </Navbar.Brand>
 
         {/* Botón para alternar el menú lateral en pantallas pequeñas */}
@@ -126,6 +127,23 @@ const Encabezado = () => {
                 {estaColapsado ? <i className="bi-house-door-fill me-2"></i> : null}
                 <strong>Productos</strong>
               </Nav.Link>
+
+              <Nav.Link
+                onClick={() => navegarA("/usuarios")}
+                className={estaColapsado ? "text-black" : "text-white"}
+              >
+                {estaColapsado ? <i className="bi-house-door-fill me-2"></i> : null}
+                <strong>Usuarios</strong>
+              </Nav.Link>
+
+              <Nav.Link
+                onClick={() => navegarA("/empleados")}
+                className={estaColapsado ? "text-black" : "text-white"}
+              >
+                {estaColapsado ? <i className="bi-house-door-fill me-2"></i> : null}
+                <strong>Empleados</strong>
+              </Nav.Link>
+
 
 
               {/* Lógica condicional para mostrar Cerrar Sesión o Iniciar Sesión */}
