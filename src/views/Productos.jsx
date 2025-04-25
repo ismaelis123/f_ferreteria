@@ -1,50 +1,46 @@
-// Importaciones necesarias para la vista
 import React, { useState, useEffect } from 'react';
-import TablaProductos from '../components/producto/TablaProductos'; // Importa el componente de tabla para compras
+import TablaProductos from '../components/producto/TablaProductos';
 import ModalRegistroProducto from '../components/producto/ModalRegistroProducto';
-import { Container, Button } from "react-bootstrap";
+import { Container, Button, Alert, Form } from 'react-bootstrap';
 
-
-
-// Declaración del componente Compras
 const Productos = () => {
-  // Estados para manejar los datos, carga y errores
-  const [listaProductos, setListaProductos] = useState([]); // Almacena los datos de la API
-  const [cargando, setCargando] = useState(true);       // Controla el estado de carga
-  const [errorCarga, setErrorCarga] = useState(null);   // Maneja errores de la petición
-  const [listaCategorias, setListaCategorias] = useState([]);
+  const [listaProductos, setListaProductos] = useState([]);
+  const [productosFiltrados, setProductosFiltrados] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [errorCarga, setErrorCarga] = useState(null);
   const [mostrarModal, setMostrarModal] = useState(false);
-  const [nuevoProducto, setNuevoProducto] = useState({
+  const [modoEdicion, setModoEdicion] = useState(false);
+  const [listaCategorias, setListaCategorias] = useState([]);
+  const [filtroBusqueda, setFiltroBusqueda] = useState('');
+  const [paginaActual, establecerPaginaActual] = useState(1);
+  const elementosPorPagina = 3;
+
+  const estadoInicialProducto = {
+    id_producto: null,
     nombre_producto: '',
     descripcion_producto: '',
     id_categoria: '',
     precio_unitario: '',
     stock: '',
     imagen: ''
-  });
+  };
+  const [productoActual, setProductoActual] = useState(estadoInicialProducto);
 
   const obtenerProductos = async () => {
     try {
-      const respuesta = await fetch('http://localhost:3000/api/productos'); // Ruta ajustada para compras
-      if (!respuesta.ok) {
-        throw new Error('Error al cargar las compras');
-      }
+      const respuesta = await fetch('http://localhost:3000/api/productos');
+      if (!respuesta.ok) throw new Error('Error al cargar los productos');
       const datos = await respuesta.json();
-      setListaProductos(datos);    // Actualiza el estado con los datos
-      setCargando(false);        // Indica que la carga terminó
+      setListaProductos(datos);
+      setProductosFiltrados(datos);
+      setCargando(false);
     } catch (error) {
-      setErrorCarga(error.message); // Guarda el mensaje de error
-      setCargando(false);        // Termina la carga aunque haya error
+      setErrorCarga(error.message);
+      setCargando(false);
     }
   };
-  // Lógica de obtención de datos con useEffect
-  useEffect(() => {
-    obtenerProductos(); 
-    obtenerCategorias();           // Ejecuta la función al montar el componente
-  }, []);                        // Array vacío para que solo se ejecute una vez
 
-   // Obtener categorías para el dropdown
-   const obtenerCategorias = async () => {
+  const obtenerCategorias = async () => {
     try {
       const respuesta = await fetch('http://localhost:3000/api/categorias');
       if (!respuesta.ok) throw new Error('Error al cargar las categorías');
@@ -55,42 +51,46 @@ const Productos = () => {
     }
   };
 
+  useEffect(() => {
+    obtenerProductos();
+    obtenerCategorias();
+  }, []);
+
+  useEffect(() => {
+    const resultados = listaProductos.filter(producto =>
+      producto.nombre_producto.toLowerCase().includes(filtroBusqueda.toLowerCase()) ||
+      producto.descripcion_producto?.toLowerCase().includes(filtroBusqueda.toLowerCase())
+    );
+    setProductosFiltrados(resultados);
+    establecerPaginaActual(1); // Resetea a la primera página al buscar
+  }, [filtroBusqueda, listaProductos]);
+
   const manejarCambioInput = (e) => {
     const { name, value } = e.target;
-    setNuevoProducto(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setProductoActual(prev => ({ ...prev, [name]: value }));
   };
 
-
   const agregarProducto = async () => {
-    if (!nuevoProducto.nombre_producto || !nuevoProducto.id_categoria || 
-        !nuevoProducto.precio_unitario || !nuevoProducto.stock) {
-      setErrorCarga("Por favor, completa todos los campos requeridos.");
+    if (
+      !productoActual.nombre_producto ||
+      !productoActual.id_categoria ||
+      !productoActual.precio_unitario ||
+      !productoActual.stock
+    ) {
+      setErrorCarga('Por favor, completa todos los campos requeridos.');
       return;
     }
 
     try {
       const respuesta = await fetch('http://localhost:3000/api/registrarproductos', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(nuevoProducto),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(productoActual),
       });
 
       if (!respuesta.ok) throw new Error('Error al agregar el producto');
-
       await obtenerProductos();
-      setNuevoProducto({
-        nombre_producto: '',
-        descripcion_producto: '',
-        id_categoria: '',
-        precio_unitario: '',
-        stock: '',
-        imagen: ''
-      });
+      setProductoActual(estadoInicialProducto);
       setMostrarModal(false);
       setErrorCarga(null);
     } catch (error) {
@@ -98,39 +98,108 @@ const Productos = () => {
     }
   };
 
-  // Renderizado de la vista
-  return (
-    <>
-      <Container className="mt-5">
-        <br />
-        <h4>Productos</h4>
+  const actualizarProducto = async () => {
+    try {
+      const respuesta = await fetch(`http://localhost:3000/api/actualizarproducto/${productoActual.id_producto}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(productoActual),
+      });
+      if (!respuesta.ok) throw new Error('Error al actualizar el producto');
+      await obtenerProductos();
+      setModoEdicion(false);
+      setMostrarModal(false);
+      setProductoActual(estadoInicialProducto);
+      setErrorCarga(null);
+    } catch (error) {
+      setErrorCarga(error.message);
+    }
+  };
 
-        <Button variant="primary" onClick={() => setMostrarModal(true)}>
+  const eliminarProducto = async (id) => {
+    const confirmar = window.confirm('¿Estás seguro de que quieres eliminar este producto?');
+    if (confirmar) {
+      try {
+        const respuesta = await fetch(`http://localhost:3000/api/eliminarproducto/${id}`, {
+          method: 'DELETE',
+        });
+        if (!respuesta.ok) throw new Error('Error al eliminar el producto');
+        await obtenerProductos();
+        setErrorCarga(null);
+      } catch (error) {
+        setErrorCarga(error.message);
+      }
+    }
+  };
+
+  const manejarActualizar = (producto) => {
+    setProductoActual(producto);
+    setModoEdicion(true);
+    setMostrarModal(true);
+  };
+
+  // Calcular productos paginados
+  const productosPaginados = productosFiltrados.slice(
+    (paginaActual - 1) * elementosPorPagina,
+    paginaActual * elementosPorPagina
+  );
+
+  return (
+    <Container className="mt-5">
+      <h4>Productos</h4>
+
+      <Button
+        variant="primary"
+        onClick={() => {
+          setMostrarModal(true);
+          setModoEdicion(false);
+          setProductoActual(estadoInicialProducto);
+        }}
+      >
         Nuevo Producto
       </Button>
-      <br/><br/>
 
-        {/* Pasa los estados como props al componente TablaCompras */}
-        <TablaProductos
-          Productos={listaProductos}
-          cargando={cargando}
-          error={errorCarga}
-        />
-            <ModalRegistroProducto
-        mostrarModal={mostrarModal}
-        setMostrarModal={setMostrarModal}
-        nuevoProducto={nuevoProducto}
-        manejarCambioInput={manejarCambioInput}
-        agregarProducto={agregarProducto}
-        errorCarga={errorCarga}
-        categorias={listaCategorias}
+      <Form.Group controlId="formBusqueda" className="mt-3 mb-3">
+        <div className="input-group">
+          <span className="input-group-text">
+            <i className="fas fa-search"></i>
+          </span>
+          <Form.Control
+            type="text"
+            placeholder="Buscar por nombre o descripción"
+            value={filtroBusqueda}
+            onChange={(e) => setFiltroBusqueda(e.target.value)}
+          />
+        </div>
+      </Form.Group>
+
+      {errorCarga && <Alert variant="danger" className="mt-3">{errorCarga}</Alert>}
+
+      <TablaProductos
+        productos={productosPaginados}
+        cargando={cargando}
+        error={errorCarga}
+        onActualizar={manejarActualizar}
+        onEliminar={eliminarProducto}
+        totalElementos={productosFiltrados.length}
+        elementosPorPagina={elementosPorPagina}
+        paginaActual={paginaActual}
+        establecerPaginaActual={establecerPaginaActual}
       />
 
-
-      </Container>
-    </>
+      <ModalRegistroProducto
+        mostrarModal={mostrarModal}
+        setMostrarModal={setMostrarModal}
+        nuevoProducto={productoActual}
+        manejarCambioInput={manejarCambioInput}
+        agregarProducto={modoEdicion ? actualizarProducto : agregarProducto}
+        actualizarProducto={actualizarProducto}
+        errorCarga={errorCarga}
+        categorias={listaCategorias}
+        esEdicion={modoEdicion}
+      />
+    </Container>
   );
 };
 
-// Exportación del componente
 export default Productos;

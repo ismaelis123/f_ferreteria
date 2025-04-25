@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import TablaClientes from '../components/clientes/TablaClientes'; 
+import TablaClientes from '../components/clientes/TablaClientes';
 import ModalRegistroCliente from '../components/clientes/ModalRegistroCliente';
-import { Container, Button, Alert, Form } from "react-bootstrap";
+import { Container, Button, Alert, Form } from 'react-bootstrap';
 
 const Clientes = () => {
-  const [listaClientes, setListaClientes] = useState([]); 
+  const [listaClientes, setListaClientes] = useState([]);
   const [clientesFiltrados, setClientesFiltrados] = useState([]);
-  const [cargando, setCargando] = useState(true);            
-  const [errorCarga, setErrorCarga] = useState(null);        
+  const [cargando, setCargando] = useState(true);
+  const [errorCarga, setErrorCarga] = useState(null);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
   const estadoInicialCliente = { id_cliente: null, primer_nombre: '', celular: '', cedula: '' };
   const [clienteActual, setClienteActual] = useState(estadoInicialCliente);
-  const [filtroBusqueda, setFiltroBusqueda] = useState("");
+  const [filtroBusqueda, setFiltroBusqueda] = useState('');
+  const [paginaActual, establecerPaginaActual] = useState(1);
+  const elementosPorPagina = 3;
 
-  const obtenerClientes = async () => { 
+  const obtenerClientes = async () => {
     try {
       const respuesta = await fetch('http://localhost:3000/api/clientes');
       if (!respuesta.ok) throw new Error('Error al cargar los clientes');
@@ -39,6 +41,7 @@ const Clientes = () => {
       cliente.cedula.toLowerCase().includes(filtroBusqueda.toLowerCase())
     );
     setClientesFiltrados(resultados);
+    establecerPaginaActual(1); // Resetea a la primera página al buscar
   }, [filtroBusqueda, listaClientes]);
 
   const manejarCambioInput = (e) => {
@@ -48,7 +51,7 @@ const Clientes = () => {
 
   const agregarCliente = async () => {
     if (!clienteActual.primer_nombre || !clienteActual.celular || !clienteActual.cedula) {
-      setErrorCarga("Todos los campos obligatorios deben completarse.");
+      setErrorCarga('Todos los campos obligatorios deben completarse.');
       return;
     }
 
@@ -70,8 +73,7 @@ const Clientes = () => {
   };
 
   const eliminarCliente = async (id) => {
-    // Mostrar un cuadro de confirmación
-    const confirmar = window.confirm("¿Estás seguro de que quieres eliminar este cliente?");
+    const confirmar = window.confirm('¿Estás seguro de que quieres eliminar este cliente?');
     
     if (confirmar) {
       try {
@@ -85,7 +87,6 @@ const Clientes = () => {
       }
     }
   };
-  
 
   const actualizarCliente = async () => {
     try {
@@ -110,36 +111,53 @@ const Clientes = () => {
     setMostrarModal(true);
   };
 
+  // Calcular clientes paginados
+  const clientesPaginados = clientesFiltrados.slice(
+    (paginaActual - 1) * elementosPorPagina,
+    paginaActual * elementosPorPagina
+  );
+
   return (
     <Container className="mt-5">
       <h4>Clientes</h4>
       
-      <Button variant="primary" onClick={() => {setMostrarModal(true); setModoEdicion(false);}}>
+      <Button
+        variant="primary"
+        onClick={() => {
+          setMostrarModal(true);
+          setModoEdicion(false);
+          setClienteActual(estadoInicialCliente);
+        }}
+      >
         Nuevo Cliente
       </Button>
-      <Form.Group controlId="formBusqueda" className="mt-3 mb-3">
-  <div className="input-group">
-    <span className="input-group-text">
-      <i className="fas fa-search"></i> {/* Icono de búsqueda */}
-    </span>
-    <Form.Control
-      type="text"
-      placeholder="Buscar"
-      value={filtroBusqueda}
-      onChange={(e) => setFiltroBusqueda(e.target.value)}
-    />
-  </div>
-</Form.Group>
 
+      <Form.Group controlId="formBusqueda" className="mt-3 mb-3">
+        <div className="input-group">
+          <span className="input-group-text">
+            <i className="fas fa-search"></i>
+          </span>
+          <Form.Control
+            type="text"
+            placeholder="Buscar"
+            value={filtroBusqueda}
+            onChange={(e) => setFiltroBusqueda(e.target.value)}
+          />
+        </div>
+      </Form.Group>
 
       {errorCarga && <Alert variant="danger" className="mt-3">{errorCarga}</Alert>}
 
-      <TablaClientes 
-        clientes={clientesFiltrados} 
-        cargando={cargando} 
-        error={errorCarga} 
-        onActualizar={manejarActualizar} 
-        onEliminar={eliminarCliente} 
+      <TablaClientes
+        clientes={clientesPaginados}
+        cargando={cargando}
+        error={errorCarga}
+        onActualizar={manejarActualizar}
+        onEliminar={eliminarCliente}
+        totalElementos={clientesFiltrados.length}
+        elementosPorPagina={elementosPorPagina}
+        paginaActual={paginaActual}
+        establecerPaginaActual={establecerPaginaActual}
       />
 
       <ModalRegistroCliente

@@ -1,14 +1,15 @@
-// Importaciones necesarias para el componente visual
 import React from 'react';
+import { Table, Button } from 'react-bootstrap';
 import Paginacion from '../ordenamiento/Paginacion';
-import { Table } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 // Declaración del componente TablaEmpleados que recibe props
 const TablaEmpleados = ({
-  empleados, 
+  empleados,
   cargando,
   error,
+  onActualizar,
+  onEliminar,
   totalElementos,
   elementosPorPagina,
   paginaActual,
@@ -19,7 +20,7 @@ const TablaEmpleados = ({
     return <div>Cargando empleados...</div>; // Muestra mensaje mientras carga
   }
   if (error) {
-    return <div>Error: {error}</div>;        // Muestra error si ocurre
+    return <div>Error: {error}</div>; // Muestra error si ocurre
   }
 
   // Renderizado de la tabla con los datos recibidos
@@ -36,6 +37,7 @@ const TablaEmpleados = ({
             <th>Celular</th>
             <th>Cargo</th>
             <th>Fecha Contratación</th>
+            <th>Funcionalidades</th>
           </tr>
         </thead>
         <tbody>
@@ -48,7 +50,25 @@ const TablaEmpleados = ({
               <td>{empleado.segundo_apellido}</td>
               <td>{empleado.celular}</td>
               <td>{empleado.cargo}</td>
-              <td>{empleado.fecha_contratacion}</td>
+              <td>{new Date(empleado.fecha_contratacion).toLocaleDateString()}</td>
+              <td>
+                {/* Botón de actualizar con icono */}
+                <Button
+                  variant="warning"
+                  size="sm"
+                  onClick={() => onActualizar(empleado)}
+                >
+                  <i className="fas fa-edit"></i> {/* Icono de editar */}
+                </Button>{' '}
+                {/* Botón de eliminar con icono */}
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => onEliminar(empleado.id_empleado)}
+                >
+                  <i className="fas fa-trash"></i> {/* Icono de eliminar */}
+                </Button>
+              </td>
             </tr>
           ))}
         </tbody>

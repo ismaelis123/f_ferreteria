@@ -7,13 +7,15 @@ const ModalRegistroProducto = ({
   nuevoProducto,
   manejarCambioInput,
   agregarProducto,
+  actualizarProducto,
   errorCarga,
-  categorias // Lista de categorías obtenidas
+  categorias,
+  esEdicion
 }) => {
   return (
     <Modal show={mostrarModal} onHide={() => setMostrarModal(false)}>
       <Modal.Header closeButton>
-        <Modal.Title>Agregar Nuevo Producto</Modal.Title>
+        <Modal.Title>{esEdicion ? "Actualizar Producto" : "Agregar Nuevo Producto"}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
@@ -107,9 +109,15 @@ const ModalRegistroProducto = ({
         <Button variant="secondary" onClick={() => setMostrarModal(false)}>
           Cancelar
         </Button>
-        <Button variant="primary" onClick={agregarProducto}>
-          Guardar Producto
-        </Button>
+        {esEdicion ? (
+          <Button variant="warning" onClick={actualizarProducto}>
+            Actualizar Producto
+          </Button>
+        ) : (
+          <Button variant="primary" onClick={agregarProducto}>
+            Guardar Producto
+          </Button>
+        )}
       </Modal.Footer>
     </Modal>
   );

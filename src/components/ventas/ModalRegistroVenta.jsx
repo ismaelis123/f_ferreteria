@@ -1,56 +1,62 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 
-// Componente de modal para registro de nueva compra
-const ModalRegistroCompra = ({
+const ModalRegistroVenta = ({
   mostrarModal,
   setMostrarModal,
-  nuevaCompra,
+  nuevaVenta,
   manejarCambioInput,
-  registrarCompra,
+  registrarVenta,
   errorCarga,
 }) => {
-  // Función para manejar el cierre del modal
   const manejarCerrarModal = () => {
-    setMostrarModal(false); // Cierra el modal
+    setMostrarModal(false);
   };
 
-  // Función para manejar el envío del formulario (registro de la compra)
-  const manejarRegistrarCompra = () => {
-    // Validación de campos requeridos
+  const manejarRegistrarVenta = () => {
     if (
-      !nuevaCompra.fecha_compra ||
-      !nuevaCompra.empleado ||
-      !nuevaCompra.producto ||
-      !nuevaCompra.cantidad ||
-      !nuevaCompra.precio_unitario
+      !nuevaVenta.fecha_venta ||
+      !nuevaVenta.cliente ||
+      !nuevaVenta.empleado ||
+      !nuevaVenta.producto ||
+      !nuevaVenta.cantidad ||
+      !nuevaVenta.precio_unitario
     ) {
       alert('Por favor complete todos los campos.');
       return;
     }
 
-    // Llamar a la función para registrar la compra si todos los campos son válidos
-    registrarCompra();
+    registrarVenta();
   };
 
   return (
     <Modal show={mostrarModal} onHide={manejarCerrarModal}>
       <Modal.Header closeButton>
-        <Modal.Title>Registrar Nueva Compra</Modal.Title>
+        <Modal.Title>Registrar Nueva Venta</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {/* Si hay error, muestra el mensaje */}
         {errorCarga && <div className="alert alert-danger">{errorCarga}</div>}
 
-        {/* Formulario para registrar la compra */}
         <Form>
-          <Form.Group controlId="fechaCompra">
-            <Form.Label>Fecha de Compra</Form.Label>
+          <Form.Group controlId="fechaVenta">
+            <Form.Label>Fecha de Venta</Form.Label>
             <Form.Control
               type="date"
-              name="fecha_compra"
-              value={nuevaCompra.fecha_compra}
+              name="fecha_venta"
+              value={nuevaVenta.fecha_venta}
               onChange={manejarCambioInput}
+              required
+            />
+          </Form.Group>
+
+          <Form.Group controlId="cliente">
+            <Form.Label>Cliente</Form.Label>
+            <Form.Control
+              type="text"
+              name="cliente"
+              value={nuevaVenta.cliente}
+              onChange={manejarCambioInput}
+              placeholder="Ingrese nombre del cliente"
               required
             />
           </Form.Group>
@@ -60,7 +66,7 @@ const ModalRegistroCompra = ({
             <Form.Control
               type="text"
               name="empleado"
-              value={nuevaCompra.empleado}
+              value={nuevaVenta.empleado}
               onChange={manejarCambioInput}
               placeholder="Ingrese nombre del empleado"
               required
@@ -72,7 +78,7 @@ const ModalRegistroCompra = ({
             <Form.Control
               type="text"
               name="producto"
-              value={nuevaCompra.producto}
+              value={nuevaVenta.producto}
               onChange={manejarCambioInput}
               placeholder="Ingrese nombre del producto"
               required
@@ -84,7 +90,7 @@ const ModalRegistroCompra = ({
             <Form.Control
               type="number"
               name="cantidad"
-              value={nuevaCompra.cantidad}
+              value={nuevaVenta.cantidad}
               onChange={manejarCambioInput}
               min="1"
               required
@@ -96,7 +102,7 @@ const ModalRegistroCompra = ({
             <Form.Control
               type="number"
               name="precio_unitario"
-              value={nuevaCompra.precio_unitario}
+              value={nuevaVenta.precio_unitario}
               onChange={manejarCambioInput}
               min="0.01"
               step="0.01"
@@ -109,15 +115,12 @@ const ModalRegistroCompra = ({
         <Button variant="secondary" onClick={manejarCerrarModal}>
           Cerrar
         </Button>
-        <Button
-          variant="primary"
-          onClick={manejarRegistrarCompra} // Llama la función para registrar la compra
-        >
-          Registrar Compra
+        <Button variant="primary" onClick={manejarRegistrarVenta}>
+          Registrar Venta
         </Button>
       </Modal.Footer>
     </Modal>
   );
 };
 
-export default ModalRegistroCompra;
+export default ModalRegistroVenta;

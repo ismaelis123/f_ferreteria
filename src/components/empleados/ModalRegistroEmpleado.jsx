@@ -1,4 +1,3 @@
-// ModalRegistroEmpleado.jsx
 import React from "react";
 import { Modal, Form, Button } from "react-bootstrap";
 
@@ -8,12 +7,14 @@ const ModalRegistroEmpleado = ({
   nuevoEmpleado,
   manejarCambioInput,
   agregarEmpleado,
+  actualizarEmpleado, // Nueva función para actualizar
   errorCarga,
+  esEdicion // Indica si el modal está en modo edición
 }) => {
   return (
     <Modal show={mostrarModal} onHide={() => setMostrarModal(false)}>
       <Modal.Header closeButton>
-        <Modal.Title>Agregar Nuevo Empleado</Modal.Title>
+        <Modal.Title>{esEdicion ? "Actualizar Empleado" : "Agregar Nuevo Empleado"}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
@@ -37,7 +38,7 @@ const ModalRegistroEmpleado = ({
               name="segundo_nombre"
               value={nuevoEmpleado.segundo_nombre}
               onChange={manejarCambioInput}
-              placeholder="Ingresa el segundo nombre (máx. 20 caracteres)"
+              placeholder="Ingresa el segundo nombre (opcional)"
               maxLength={20}
             />
           </Form.Group>
@@ -62,7 +63,7 @@ const ModalRegistroEmpleado = ({
               name="segundo_apellido"
               value={nuevoEmpleado.segundo_apellido}
               onChange={manejarCambioInput}
-              placeholder="Ingresa el segundo apellido (máx. 20 caracteres)"
+              placeholder="Ingresa el segundo apellido (opcional)"
               maxLength={20}
             />
           </Form.Group>
@@ -70,7 +71,7 @@ const ModalRegistroEmpleado = ({
           <Form.Group className="mb-3" controlId="formCelular">
             <Form.Label>Celular</Form.Label>
             <Form.Control
-              type="text"
+              type="tel"
               name="celular"
               value={nuevoEmpleado.celular}
               onChange={manejarCambioInput}
@@ -113,9 +114,15 @@ const ModalRegistroEmpleado = ({
         <Button variant="secondary" onClick={() => setMostrarModal(false)}>
           Cancelar
         </Button>
-        <Button variant="primary" onClick={agregarEmpleado}>
-          Guardar Empleado
-        </Button>
+        {esEdicion ? (
+          <Button variant="warning" onClick={actualizarEmpleado}>
+            Actualizar Empleado
+          </Button>
+        ) : (
+          <Button variant="primary" onClick={agregarEmpleado}>
+            Guardar Empleado
+          </Button>
+        )}
       </Modal.Footer>
     </Modal>
   );

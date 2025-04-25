@@ -1,18 +1,22 @@
-// Importaciones necesarias para la vista
 import React, { useState, useEffect } from 'react';
-import TablaEmpleados from '../components/empleados/TablaEmpleados'; // Importa el componente de tabla
+import TablaEmpleados from '../components/empleados/TablaEmpleados';
 import ModalRegistroEmpleado from '../components/empleados/ModalRegistroEmpleado';
 import CuadroBusquedas from '../components/busquedas/CuadroBusquedas';
-import { Container, Button, Row, Col } from "react-bootstrap";
+import { Container, Button, Alert, Row, Col } from 'react-bootstrap';
 
-// Declaración del componente Empleados
 const Empleados = () => {
-  // Estados para manejar los datos, carga y errores
-  const [listaEmpleados, setListaEmpleados] = useState([]); // Almacena los datos de la API
-  const [cargando, setCargando] = useState(true);          // Controla el estado de carga
-  const [errorCarga, setErrorCarga] = useState(null);      // Maneja errores de la petición
+  const [listaEmpleados, setListaEmpleados] = useState([]);
+  const [empleadosFiltrados, setEmpleadosFiltrados] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [errorCarga, setErrorCarga] = useState(null);
   const [mostrarModal, setMostrarModal] = useState(false);
-  const [nuevoEmpleado, setNuevoEmpleado] = useState({
+  const [modoEdicion, setModoEdicion] = useState(false);
+  const [textoBusqueda, setTextoBusqueda] = useState('');
+  const [paginaActual, establecerPaginaActual] = useState(1);
+  const elementosPorPagina = 3;
+
+  const estadoInicialEmpleado = {
+    id_empleado: null,
     primer_nombre: '',
     segundo_nombre: '',
     primer_apellido: '',
@@ -20,74 +24,69 @@ const Empleados = () => {
     celular: '',
     cargo: '',
     fecha_contratacion: ''
-  });
-
-  const [empleadosFiltrados, setEmpleadosFiltrados] = useState([]);
-  const [textoBusqueda, setTextoBusqueda] = useState("");
-  const [paginaActual, establecerPaginaActual] = useState(1);
-  const elementosPorPagina = 3; // Número de elementos por página
+  };
+  const [empleadoActual, setEmpleadoActual] = useState(estadoInicialEmpleado);
 
   const obtenerEmpleados = async () => {
     try {
       const respuesta = await fetch('http://localhost:3000/api/empleados');
-      if (!respuesta.ok) {
-        throw new Error('Error al cargar los empleados');
-      }
+      if (!respuesta.ok) throw new Error('Error al cargar los empleados');
       const datos = await respuesta.json();
-      setListaEmpleados(datos);    // Actualiza el estado con los datos
+      setListaEmpleados(datos);
       setEmpleadosFiltrados(datos);
-      setCargando(false);          // Indica que la carga terminó
+      setCargando(false);
     } catch (error) {
-      setErrorCarga(error.message); // Guarda el mensaje de error
-      setCargando(false);          // Termina la carga aunque haya error
+      setErrorCarga(error.message);
+      setCargando(false);
     }
   };
 
-  // Lógica de obtención de datos con useEffect
   useEffect(() => {
-    obtenerEmpleados();            // Ejecuta la función al montar el componente
-  }, []);                          // Array vacío para que solo se ejecute una vez
+    obtenerEmpleados();
+  }, []);
 
-  // Maneja los cambios en los inputs del modal
+  useEffect(() => {
+    const resultados = listaEmpleados.filter(
+      (empleado) =>
+        empleado.primer_nombre.toLowerCase().includes(textoBusqueda.toLowerCase()) ||
+        (empleado.segundo_nombre && empleado.segundo_nombre.toLowerCase().includes(textoBusqueda.toLowerCase())) ||
+        empleado.primer_apellido.toLowerCase().includes(textoBusqueda.toLowerCase()) ||
+        (empleado.segundo_apellido && empleado.segundo_apellido.toLowerCase().includes(textoBusqueda.toLowerCase())) ||
+        empleado.celular.toLowerCase().includes(textoBusqueda.toLowerCase()) ||
+        empleado.cargo.toLowerCase().includes(textoBusqueda.toLowerCase()) ||
+        empleado.fecha_contratacion.toLowerCase().includes(textoBusqueda.toLowerCase())
+    );
+    setEmpleadosFiltrados(resultados);
+    establecerPaginaActual(1); // Resetea a la primera página al buscar
+  }, [textoBusqueda, listaEmpleados]);
+
   const manejarCambioInput = (e) => {
     const { name, value } = e.target;
-    setNuevoEmpleado(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setEmpleadoActual(prev => ({ ...prev, [name]: value }));
   };
 
-  // Manejo la inserción de un nuevo empleado
   const agregarEmpleado = async () => {
-    if (!nuevoEmpleado.primer_nombre || !nuevoEmpleado.primer_apellido || 
-        !nuevoEmpleado.celular || !nuevoEmpleado.cargo || !nuevoEmpleado.fecha_contratacion) {
-      setErrorCarga("Por favor, completa todos los campos obligatorios antes de guardar.");
+    if (
+      !empleadoActual.primer_nombre ||
+      !empleadoActual.primer_apellido ||
+      !empleadoActual.celular ||
+      !empleadoActual.cargo ||
+      !empleadoActual.fecha_contratacion
+    ) {
+      setErrorCarga('Por favor, completa todos los campos obligatorios antes de guardar.');
       return;
     }
 
     try {
       const respuesta = await fetch('http://localhost:3000/api/registrarempleado', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(nuevoEmpleado),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(empleadoActual),
       });
 
-      if (!respuesta.ok) {
-        throw new Error('Error al agregar el empleado');
-      }
-
-      await obtenerEmpleados(); // Refresca toda la lista desde el servidor
-      setNuevoEmpleado({
-        primer_nombre: '',
-        segundo_nombre: '',
-        primer_apellido: '',
-        segundo_apellido: '',
-        celular: '',
-        cargo: '',
-        fecha_contratacion: ''
-      });
+      if (!respuesta.ok) throw new Error('Error al agregar el empleado');
+      await obtenerEmpleados();
+      setEmpleadoActual(estadoInicialEmpleado);
       setMostrarModal(false);
       setErrorCarga(null);
     } catch (error) {
@@ -95,22 +94,48 @@ const Empleados = () => {
     }
   };
 
+  const actualizarEmpleado = async () => {
+    try {
+      const respuesta = await fetch(`http://localhost:3000/api/actualizarempleado/${empleadoActual.id_empleado}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(empleadoActual),
+      });
+      if (!respuesta.ok) throw new Error('Error al actualizar el empleado');
+      await obtenerEmpleados();
+      setModoEdicion(false);
+      setMostrarModal(false);
+      setEmpleadoActual(estadoInicialEmpleado);
+      setErrorCarga(null);
+    } catch (error) {
+      setErrorCarga(error.message);
+    }
+  };
+
+  const eliminarEmpleado = async (id) => {
+    const confirmar = window.confirm('¿Estás seguro de que quieres eliminar este empleado?');
+    if (confirmar) {
+      try {
+        const respuesta = await fetch(`http://localhost:3000/api/eliminarempleado/${id}`, {
+          method: 'DELETE',
+        });
+        if (!respuesta.ok) throw new Error('Error al eliminar el empleado');
+        await obtenerEmpleados();
+        setErrorCarga(null);
+      } catch (error) {
+        setErrorCarga(error.message);
+      }
+    }
+  };
+
+  const manejarActualizar = (empleado) => {
+    setEmpleadoActual(empleado);
+    setModoEdicion(true);
+    setMostrarModal(true);
+  };
+
   const manejarCambioBusqueda = (e) => {
-    const texto = e.target.value.toLowerCase();
-    setTextoBusqueda(texto);
-    establecerPaginaActual(1); // Resetea a la primera página al buscar
-    
-    const filtrados = listaEmpleados.filter(
-      (empleado) =>
-        empleado.primer_nombre.toLowerCase().includes(texto) ||
-        (empleado.segundo_nombre && empleado.segundo_nombre.toLowerCase().includes(texto)) ||
-        empleado.primer_apellido.toLowerCase().includes(texto) ||
-        (empleado.segundo_apellido && empleado.segundo_apellido.toLowerCase().includes(texto)) ||
-        empleado.celular.toLowerCase().includes(texto) ||
-        empleado.cargo.toLowerCase().includes(texto) ||
-        empleado.fecha_contratacion.toLowerCase().includes(texto)
-    );
-    setEmpleadosFiltrados(filtrados);
+    setTextoBusqueda(e.target.value);
   };
 
   // Calcular elementos paginados
@@ -119,51 +144,58 @@ const Empleados = () => {
     paginaActual * elementosPorPagina
   );
 
-  // Renderizado de la vista
   return (
-    <>
-      <Container className="mt-5">
-        <br />
-        <h4>Empleados</h4>
+    <Container className="mt-5">
+      <h4>Empleados</h4>
 
-        <Row>
-          <Col lg={2} md={4} sm={4} xs={5}>
-            <Button variant="primary" onClick={() => setMostrarModal(true)} style={{ width: "100%" }}>
-              Nuevo Empleado
-            </Button>
-          </Col>
-          <Col lg={5} md={8} sm={8} xs={7}>
-            <CuadroBusquedas
-              textoBusqueda={textoBusqueda}
-              manejarCambioBusqueda={manejarCambioBusqueda}
-            />
-          </Col>
-        </Row>
+      <Row>
+        <Col lg={2} md={4} sm={4} xs={5}>
+          <Button
+            variant="primary"
+            onClick={() => {
+              setMostrarModal(true);
+              setModoEdicion(false);
+              setEmpleadoActual(estadoInicialEmpleado);
+            }}
+            style={{ width: '100%' }}
+          >
+            Nuevo Empleado
+          </Button>
+        </Col>
+        <Col lg={5} md={8} sm={8} xs={7}>
+          <CuadroBusquedas
+            textoBusqueda={textoBusqueda}
+            manejarCambioBusqueda={manejarCambioBusqueda}
+          />
+        </Col>
+      </Row>
 
-        <br/><br/>
+      {errorCarga && <Alert variant="danger" className="mt-3">{errorCarga}</Alert>}
 
-        {/* Pasa los estados como props al componente TablaEmpleados */}
-        <TablaEmpleados 
-          empleados={empleadosPaginados} 
-          cargando={cargando} 
-          error={errorCarga}
-          totalElementos={empleadosFiltrados.length} // Total de elementos
-          elementosPorPagina={elementosPorPagina} // Elementos por página
-          paginaActual={paginaActual} // Página actual
-          establecerPaginaActual={establecerPaginaActual} // Método para cambiar página
-        />
-        <ModalRegistroEmpleado
-          mostrarModal={mostrarModal}
-          setMostrarModal={setMostrarModal}
-          nuevoEmpleado={nuevoEmpleado}
-          manejarCambioInput={manejarCambioInput}
-          agregarEmpleado={agregarEmpleado}
-          errorCarga={errorCarga}
-        />
-      </Container>
-    </>
+      <TablaEmpleados
+        empleados={empleadosPaginados}
+        cargando={cargando}
+        error={errorCarga}
+        onActualizar={manejarActualizar}
+        onEliminar={eliminarEmpleado}
+        totalElementos={empleadosFiltrados.length}
+        elementosPorPagina={elementosPorPagina}
+        paginaActual={paginaActual}
+        establecerPaginaActual={establecerPaginaActual}
+      />
+
+      <ModalRegistroEmpleado
+        mostrarModal={mostrarModal}
+        setMostrarModal={setMostrarModal}
+        nuevoEmpleado={empleadoActual}
+        manejarCambioInput={manejarCambioInput}
+        agregarEmpleado={modoEdicion ? actualizarEmpleado : agregarEmpleado}
+        actualizarEmpleado={actualizarEmpleado}
+        errorCarga={errorCarga}
+        esEdicion={modoEdicion}
+      />
+    </Container>
   );
 };
 
-// Exportación del componente
 export default Empleados;

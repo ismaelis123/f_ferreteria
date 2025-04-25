@@ -1,4 +1,3 @@
-// ModalRegistroCategoria.jsx
 import React from "react";
 import { Modal, Form, Button } from "react-bootstrap";
 
@@ -8,12 +7,14 @@ const ModalRegistroCategoria = ({
   nuevaCategoria,
   manejarCambioInput,
   agregarCategoria,
+  actualizarCategoria,
   errorCarga,
+  esEdicion
 }) => {
   return (
     <Modal show={mostrarModal} onHide={() => setMostrarModal(false)}>
       <Modal.Header closeButton>
-        <Modal.Title>Agregar Nueva Categoría</Modal.Title>
+        <Modal.Title>{esEdicion ? "Actualizar Categoría" : "Agregar Nueva Categoría"}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
@@ -47,14 +48,18 @@ const ModalRegistroCategoria = ({
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => {
-          setMostrarModal(false);
-        }}>
+        <Button variant="secondary" onClick={() => setMostrarModal(false)}>
           Cancelar
         </Button>
-        <Button variant="primary" onClick={agregarCategoria}>
-          Guardar Categoría
-        </Button>
+        {esEdicion ? (
+          <Button variant="warning" onClick={actualizarCategoria}>
+            Actualizar Categoría
+          </Button>
+        ) : (
+          <Button variant="primary" onClick={agregarCategoria}>
+            Guardar Categoría
+          </Button>
+        )}
       </Modal.Footer>
     </Modal>
   );

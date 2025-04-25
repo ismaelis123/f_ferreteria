@@ -7,10 +7,10 @@ const ModalRegistroCliente = ({
   nuevoCliente,
   manejarCambioInput,
   agregarCliente,
-  actualizarCliente, // Nueva función para actualizar
+  actualizarCliente,
   eliminarCliente,
   errorCarga,
-  esEdicion // Indica si el modal está en modo edición
+  esEdicion
 }) => {
   return (
     <Modal show={mostrarModal} onHide={() => setMostrarModal(false)}>
