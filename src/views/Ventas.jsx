@@ -1,139 +1,79 @@
 import React, { useState, useEffect } from 'react';
 import TablaVentas from '../components/ventas/TablaVentas';
-import ModalRegistroVenta from '../components/ventas/ModalRegistroVenta';
 import { Container, Button, Form } from 'react-bootstrap';
+import ModalDetallesVenta from '../components/detalles_ventas/ModalDetallesVenta';
 
 const Ventas = () => {
+  // Estados para la lista de ventas
   const [listaVentas, setListaVentas] = useState([]);
-  const [ventasFiltradas, setVentasFiltradas] = useState([]);
-  const [cargando, setCargando] = useState(true);
+  const [cargando, setCargando] = useState(false);
   const [errorCarga, setErrorCarga] = useState(null);
+  
+  // Estados para el modal de detalles
   const [mostrarModal, setMostrarModal] = useState(false);
-  const [filtroBusqueda, setFiltroBusqueda] = useState('');
-  const [paginaActual, establecerPaginaActual] = useState(1);
-  const elementosPorPagina = 3;
+  const [detallesVenta, setDetallesVenta] = useState([]);
+  const [cargandoDetalles, setCargandoDetalles] = useState(false);
+  const [errorDetalles, setErrorDetalles] = useState(null);
 
-  const [nuevaVenta, setNuevaVenta] = useState({
-    fecha_venta: '',
-    cliente: '',
-    empleado: '',
-    producto: '',
-    cantidad: 1,
-    precio_unitario: 0,
-  });
-
-  useEffect(() => {
-    const obtenerVentas = async () => {
-      try {
-        const respuesta = await fetch('http://localhost:3000/api/ventas');
-        if (!respuesta.ok) {
-          throw new Error('Error al cargar las ventas');
-        }
-        const datos = await respuesta.json();
-        setListaVentas(datos);
-        setVentasFiltradas(datos);
-        setCargando(false);
-      } catch (error) {
-        setErrorCarga(error.message);
-        setCargando(false);
-      }
-    };
-    obtenerVentas();
-  }, []);
-
-  useEffect(() => {
-    const resultados = listaVentas.filter(venta =>
-      venta.nombre_cliente.toLowerCase().includes(filtroBusqueda.toLowerCase()) ||
-      venta.nombre_empleado.toLowerCase().includes(filtroBusqueda.toLowerCase()) ||
-      venta.nombre_producto.toLowerCase().includes(filtroBusqueda.toLowerCase())
-    );
-    setVentasFiltradas(resultados);
-    establecerPaginaActual(1); // Resetea a la primera página al buscar
-  }, [filtroBusqueda, listaVentas]);
-
-  const manejarCambioInput = (event) => {
-    const { name, value } = event.target;
-    setNuevaVenta((prevVenta) => ({
-      ...prevVenta,
-      [name]: value,
-    }));
-  };
-
-  const registrarVenta = async () => {
+  // Función para obtener la lista de ventas
+  const obtenerVentas = async () => {
+    setCargando(true);
+    setErrorCarga(null);
     try {
-      const respuesta = await fetch('http://localhost:3000/api/registrarventa', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(nuevaVenta),
-      });
-
+      const respuesta = await fetch('http://localhost:3000/api/obtenerventas');
       if (!respuesta.ok) {
-        throw new Error('Error al registrar la venta');
+        throw new Error('Error al cargar las ventas');
       }
-
-      const ventaRegistrada = await respuesta.json();
-      setListaVentas((prevVentas) => [...prevVentas, ventaRegistrada]);
-      setMostrarModal(false);
-      setNuevaVenta({
-        fecha_venta: '',
-        cliente: '',
-        empleado: '',
-        producto: '',
-        cantidad: 1,
-        precio_unitario: 0,
-      });
+      const datos = await respuesta.json();
+      setListaVentas(datos);
+      setCargando(false);
     } catch (error) {
       setErrorCarga(error.message);
+      setCargando(false);
     }
   };
 
-  // Calcular ventas paginadas
-  const ventasPaginadas = ventasFiltradas.slice(
-    (paginaActual - 1) * elementosPorPagina,
-    paginaActual * elementosPorPagina
-  );
+  // Función para obtener detalles de una venta
+  const obtenerDetalles = async (id_venta) => {
+    setCargandoDetalles(true);
+    setErrorDetalles(null);
+    try {
+      const respuesta = await fetch(`http://localhost:3000/api/obtenerdetallesventa/${id_venta}`);
+      if (!respuesta.ok) {
+        throw new Error('Error al cargar los detalles de la venta');
+      }
+      const datos = await respuesta.json();
+      setDetallesVenta(datos);
+      setCargandoDetalles(false);
+      setMostrarModal(true); // Abre el modal
+    } catch (error) {
+      setErrorDetalles(error.message);
+      setCargandoDetalles(false);
+    }
+  };
+
+  // Cargar las ventas al montar el componente
+  useEffect(() => {
+    obtenerVentas();
+  }, []);
 
   return (
-    <Container className="mt-5">
-      <h4>Ventas con Detalles</h4>
-
-      <Button variant="primary" onClick={() => setMostrarModal(true)}>
-        Registrar Nueva Venta
-      </Button>
-
-      <Form.Group controlId="formBusqueda" className="mt-3 mb-3">
-        <div className="input-group">
-          <span className="input-group-text">
-            <i className="fas fa-search"></i>
-          </span>
-          <Form.Control
-            type="text"
-            placeholder="Buscar por cliente, empleado o producto"
-            value={filtroBusqueda}
-            onChange={(e) => setFiltroBusqueda(e.target.value)}
-          />
-        </div>
-      </Form.Group>
-
+    <Container>
+      <h1 className="my-4">Listado de Ventas</h1>
+      
       <TablaVentas
-        ventas={ventasPaginadas}
+        ventas={listaVentas}
         cargando={cargando}
         error={errorCarga}
-        totalElementos={ventasFiltradas.length}
-        elementosPorPagina={elementosPorPagina}
-        paginaActual={paginaActual}
-        establecerPaginaActual={establecerPaginaActual}
+        obtenerDetalles={obtenerDetalles}
       />
-
-      <ModalRegistroVenta
+      
+      <ModalDetallesVenta
         mostrarModal={mostrarModal}
         setMostrarModal={setMostrarModal}
-        nuevaVenta={nuevaVenta}
-        manejarCambioInput={manejarCambioInput}
-        registrarVenta={registrarVenta}
-        errorCarga={errorCarga}
+        detalles={detallesVenta}
+        cargandoDetalles={cargandoDetalles}
+        errorDetalles={errorDetalles}
       />
     </Container>
   );
