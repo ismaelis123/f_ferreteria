@@ -2,16 +2,16 @@ import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Modal, Button, Table, Container } from 'react-bootstrap';
 
-const ModalDetallesVenta = ({ mostrarModal, setMostrarModal, detalles, cargandoDetalles, errorDetalles }) => {
+const ModalDetallesCompra = ({ mostrarModal, setMostrarModal, detalles, cargandoDetalles, errorDetalles }) => {
   return (
     <Modal
       show={mostrarModal}
       onHide={() => setMostrarModal(false)}
       fullscreen={true}
-      aria-labelledby="detalles-venta-modal"
+      aria-labelledby="detalles-compra-modal"
     >
       <Modal.Header closeButton>
-        <Modal.Title id="detalles-venta-modal">Detalles de la Venta</Modal.Title>
+        <Modal.Title id="detalles-compra-modal">Detalles de la Compra</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {cargandoDetalles && <div>Cargando detalles...</div>}
@@ -30,8 +30,8 @@ const ModalDetallesVenta = ({ mostrarModal, setMostrarModal, detalles, cargandoD
               </thead>
               <tbody>
                 {detalles.map((detalle) => (
-                  <tr key={detalle.id_detalle_venta}>
-                    <td>{detalle.id_detalle_venta}</td>
+                  <tr key={detalle.id_detalle_compra}>
+                    <td>{detalle.id_detalle_compra}</td>
                     <td>{detalle.nombre_producto}</td>
                     <td>{detalle.descripcion_producto}</td>
                     <td>{detalle.cantidad}</td>
@@ -53,4 +53,4 @@ const ModalDetallesVenta = ({ mostrarModal, setMostrarModal, detalles, cargandoD
   );
 };
 
-export default ModalDetallesVenta;
+export default ModalDetallesCompra;

@@ -1,24 +1,30 @@
-/* Estilos originales del navbar */
+/* Estilos para el navbar */
 .color-navbar {
-  background-color: #FF3CAC;
-  background-image: linear-gradient(225deg, #FF3CAC 0%, #784BA0 50%, #2B86C5 100%);
+  background: linear-gradient(225deg, #e91e63 0%, #673ab7 50%, #2196f3 100%);
+  padding: 10px 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
+/* Color del texto de la marca */
 .color-texto-marca {
-  color: #1e3d87 !important;
+  color: #ffffff !important;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
+/* Margen superior para el contenido principal */
 .margen-superior-main {
-  margin-top: 60px;
+  margin-top: 70px;
 }
 
 /* Fondo general de la página */
 body {
   margin: 0;
-  background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
-  font-family: Arial, sans-serif;
+  background: linear-gradient(180deg, #eceff1 0%, #cfd8dc 100%);
+  font-family: 'Roboto', Arial, sans-serif;
   position: relative;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* Contenedor principal */
@@ -32,114 +38,168 @@ main {
 
 /* Estilo para el contenedor de contenido */
 .content {
-  background: rgba(255, 255, 255, 0.8);
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Estilos para la tabla */
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px; /* Reducido para que se vea más compacto */
+  font-size: 14px;
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 table th, table td {
-  padding: 5px 10px; /* Reducido para que ocupe menos espacio */
+  padding: 8px 12px;
   text-align: left;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 table th {
-  background-color: #f1f1f1;
+  background: #1976d2;
+  color: #ffffff;
+  font-weight: 600;
 }
 
 table td {
-  background-color: #f9f9f9;
+  background: #fafafa;
+  color: #333;
 }
 
 /* Estilo para botones */
 .btn {
-  padding: 5px 10px; /* Reducido */
-  font-size: 12px; /* Reducido */
+  padding: 6px 12px;
+  font-size: 13px;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
-  margin: 2px;
+  margin: 3px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
 }
 
 .btn-actualizar {
-  background-color: #FFC107; /* Amarillo */
-  color: black;
-}
-
-.btn-eliminar {
-  background-color: #DC3545; /* Rojo */
+  background-color: #4caf50;
   color: white;
 }
 
-/* Estilos para las formas SVG */
+.btn-actualizar:hover {
+  background-color: #43a047;
+}
+
+.btn-eliminar {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn-eliminar:hover {
+  background-color: #d32f2f;
+}
+
+.btn-primary {
+  background-color: #2196f3;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #1976d2;
+}
+
+/* Estilos para las formas SVG de herramientas */
 .tool-shape {
   position: absolute;
   fill: none;
-  stroke: #6c757d;
-  stroke-width: 2;
-  opacity: 0.3;
+  stroke: #90a4ae;
+  stroke-width: 1.5;
+  opacity: 0.25;
   z-index: 0;
+  animation: float 6s ease-in-out infinite;
 }
 
 #hammer {
-  top: 100px;
-  left: 50px;
-  transform: rotate(-20deg);
+  top: 10%;
+  left: 5%;
+  transform: rotate(-15deg);
+  width: 80px;
 }
 
 #screwdriver {
-  top: 300px;
-  right: 50px;
-  transform: rotate(30deg);
+  top: 60%;
+  right: 5%;
+  transform: rotate(25deg);
+  width: 60px;
 }
 
 #nut {
-  bottom: 100px;
-  left: 150px;
+  bottom: 15%;
+  left: 10%;
+  width: 50px;
+}
+
+/* Animación para las formas SVG */
+@keyframes float {
+  0% {
+    transform: translateY(0) rotate(-15deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(-10deg);
+  }
+  100% {
+    transform: translateY(0) rotate(-15deg);
+  }
 }
 
 /* Estilo para la barra de búsqueda */
 .input-busqueda {
-  width: 180px; /* Establece un tamaño más pequeño para la barra de búsqueda */
-  padding: 5px 8px; /* Ajuste para que el padding sea más compacto */
-  font-size: 14px; /* Tamaño de fuente más pequeño */
-  border-radius: 5px; /* Bordes redondeados */
-  border: 1px solid #ccc; /* Color de borde más suave */
+  width: 200px;
+  padding: 6px 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #b0bec5;
+  background: #ffffff;
+  transition: border-color 0.3s ease;
+}
+
+.input-busqueda:focus {
+  border-color: #2196f3;
+  outline: none;
 }
 
 /* Barra de búsqueda con icono a la derecha */
 .input-group {
-  max-width: 250px; /* Ajusta el ancho de la barra */
-  margin: 10px 0;   /* Espaciado encima y debajo para mantener separación */
+  max-width: 250px;
+  margin: 12px 0;
 }
 
 .input-group-text {
-  background-color: #f1f1f1;
-  border-left: none; /* Elimina el borde entre el icono y el input */
+  background-color: #eceff1;
+  border: 1px solid #b0bec5;
+  border-left: none;
+  color: #546e7a;
 }
 
 .form-control {
-  padding: 5px 10px;  /* Ajuste del padding para que la barra sea más pequeña */
-  font-size: 14px;     /* Ajuste del tamaño de la fuente */
-  border-right: none;  /* Elimina el borde entre el input y el icono */
-  border-radius: 5px 0 0 5px; /* Bordes redondeados solo al lado izquierdo */
+  padding: 6px 12px;
+  font-size: 14px;
+  border: 1px solid #b0bec5;
+  border-right: none;
+  border-radius: 6px 0 0 6px;
+  background: #ffffff;
 }
 
-/* Ajustar el icono a la derecha */
 .input-group .input-group-text {
-  border-radius: 0 5px 5px 0; /* Bordes redondeados solo al lado derecho */
+  border-radius: 0 6px 6px 0;
 }
 
 /* Estilo para los iconos en los botones de acción */
 .btn i {
-  margin-right: 5px;
+  margin-right: 4px;
 }
-
-/* Estilo para*

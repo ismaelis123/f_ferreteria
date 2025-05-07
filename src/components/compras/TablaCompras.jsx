@@ -1,66 +1,62 @@
 import React from 'react';
-import { Table } from 'react-bootstrap';
-import Paginacion from '../ordenamiento/Paginacion';
+import { Table, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const TablaCompras = ({
-  compras,
-  cargando,
-  error,
-  totalElementos,
-  elementosPorPagina,
-  paginaActual,
-  establecerPaginaActual
-}) => {
+const TablaCompras = ({ compras, cargando, error, obtenerDetalles, abrirModalEliminacion, abrirModalActualizacion }) => {
   if (cargando) {
     return <div>Cargando compras...</div>;
   }
-
   if (error) {
     return <div>Error: {error}</div>;
   }
 
-  if (compras.length === 0) {
-    return <div>No se encontraron compras.</div>;
-  }
-
   return (
-    <>
-      <Table striped bordered hover responsive>
-        <thead>
-          <tr>
-            <th>ID Compra</th>
-            <th>ID Detalle Compra</th>
-            <th>Fecha Compra</th>
-            <th>Empleado</th>
-            <th>Producto</th>
-            <th>Cantidad</th>
-            <th>Precio Unitario</th>
-            <th>Subtotal</th>
+    <Table striped bordered hover responsive>
+      <thead>
+        <tr>
+          <th>ID Compra</th>
+          <th>Fecha Compra</th>
+          <th>Empleado</th>
+          <th>Total</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {compras.map((compra) => (
+          <tr key={`${compra.id_compra}`}>
+            <td>{compra.id_compra}</td>
+            <td>{compra.fecha_compra}</td>
+            <td>{compra.nombre_empleado}</td>
+            <td>C$ {compra.total_compra.toFixed(2)}</td>
+            <td>
+              <Button
+                variant="outline-success"
+                size="sm"
+                className="me-2"
+                onClick={() => obtenerDetalles(compra.id_compra)}
+              >
+                <i className="bi bi-list-ul"></i>
+              </Button>
+              <Button
+                variant="outline-danger"
+                size="sm"
+                className="me-2"
+                onClick={() => abrirModalEliminacion(compra)}
+              >
+                <i className="bi bi-trash"></i>
+              </Button>
+              <Button
+                variant="outline-danger"
+                size="sm"
+                onClick={() => abrirModalActualizacion(compra)}
+              >
+                <i className="bi bi-pencil"></i>
+              </Button>
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {compras.map((compra) => (
-            <tr key={`${compra.id_compra}-${compra.id_detalle_compra}`}>
-              <td>{compra.id_compra}</td>
-              <td>{compra.id_detalle_compra}</td>
-              <td>{compra.fecha_compra}</td>
-              <td>{compra.nombre_empleado}</td>
-              <td>{compra.nombre_producto}</td>
-              <td>{compra.cantidad}</td>
-              <td>C$ {parseFloat(compra.precio_unitario).toFixed(2)}</td>
-              <td>C$ {parseFloat(compra.subtotal).toFixed(2)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-      <Paginacion
-        elementosPorPagina={elementosPorPagina}
-        totalElementos={totalElementos}
-        paginaActual={paginaActual}
-        establecerPaginaActual={establecerPaginaActual}
-      />
-    </>
+        ))}
+      </tbody>
+    </Table>
   );
 };
 
