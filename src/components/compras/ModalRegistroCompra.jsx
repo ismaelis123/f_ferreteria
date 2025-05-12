@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { Modal, Form, Button, Table, Row, Col, FormControl } from "react-bootstrap";
+import React, { useState } from 'react';
+import { Modal, Form, Button, Table, Row, Col, FormControl } from 'react-bootstrap';
 import AsyncSelect from 'react-select/async';
 import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
+import 'react-datepicker/dist/react-datepicker.css';
 
 const ModalRegistroCompra = ({
   mostrarModal,
@@ -21,10 +21,8 @@ const ModalRegistroCompra = ({
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [nuevoDetalle, setNuevoDetalle] = useState({ id_producto: '', cantidad: '', precio_unitario: '' });
 
-  // Calcular total de la compra
   const totalCompra = detallesCompra.reduce((sum, detalle) => sum + (detalle.cantidad * detalle.precio_unitario), 0);
 
-  // Cargar opciones para AsyncSelect
   const cargarEmpleados = (inputValue, callback) => {
     const filtrados = empleados.filter(empleado =>
       `${empleado.primer_nombre} ${empleado.primer_apellido}`.toLowerCase().includes(inputValue.toLowerCase())
@@ -46,7 +44,6 @@ const ModalRegistroCompra = ({
     })));
   };
 
-  // Manejar cambios en los selectores
   const manejarCambioEmpleado = (seleccionado) => {
     setEmpleadoSeleccionado(seleccionado);
     setNuevaCompra(prev => ({ ...prev, id_empleado: seleccionado ? seleccionado.value : '' }));
@@ -61,19 +58,16 @@ const ModalRegistroCompra = ({
     }));
   };
 
-  // Manejar cambios en el detalle
   const manejarCambioDetalle = (e) => {
     const { name, value } = e.target;
     setNuevoDetalle(prev => ({ ...prev, [name]: value }));
   };
 
-  // Agregar detalle a la lista
   const manejarAgregarDetalle = () => {
     if (!nuevoDetalle.id_producto || !nuevoDetalle.cantidad || nuevoDetalle.cantidad <= 0) {
-      alert("Por favor, selecciona un producto y una cantidad válida.");
+      alert('Por favor, selecciona un producto y una cantidad válida.');
       return;
     }
-
     agregarDetalle({
       id_producto: nuevoDetalle.id_producto,
       nombre_producto: productoSeleccionado.label,
@@ -85,12 +79,7 @@ const ModalRegistroCompra = ({
   };
 
   return (
-    <Modal
-      show={mostrarModal}
-      onHide={() => setMostrarModal(false)}
-      fullscreen={true}
-      aria-labelledby="contained-modal-title-vcenter"
-    >
+    <Modal show={mostrarModal} onHide={() => setMostrarModal(false)} fullscreen={true}>
       <Modal.Header closeButton>
         <Modal.Title>Registrar Nueva Compra</Modal.Title>
       </Modal.Header>
@@ -166,8 +155,9 @@ const ModalRegistroCompra = ({
                   type="number"
                   name="precio_unitario"
                   value={nuevoDetalle.precio_unitario}
-                  disabled
-                  placeholder="Automático"
+                  onChange={manejarCambioDetalle}
+                  placeholder="Precio"
+                  required
                 />
               </Form.Group>
             </Col>
@@ -177,7 +167,6 @@ const ModalRegistroCompra = ({
               </Button>
             </Col>
           </Row>
-
           {detallesCompra.length > 0 && (
             <>
               <h5 className="mt-4">Detalles Agregados</h5>
@@ -209,10 +198,7 @@ const ModalRegistroCompra = ({
               </Table>
             </>
           )}
-
-          {errorCarga && (
-            <div className="text-danger mt-2">{errorCarga}</div>
-          )}
+          {errorCarga && <div className="text-danger mt-2">{errorCarga}</div>}
         </Form>
       </Modal.Body>
       <Modal.Footer>

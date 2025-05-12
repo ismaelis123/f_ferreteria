@@ -3,12 +3,8 @@ import { Table, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const TablaCompras = ({ compras, cargando, error, obtenerDetalles, abrirModalEliminacion, abrirModalActualizacion }) => {
-  if (cargando) {
-    return <div>Cargando compras...</div>;
-  }
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
+  if (cargando) return <div>Cargando compras...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <Table striped bordered hover responsive>
@@ -27,7 +23,7 @@ const TablaCompras = ({ compras, cargando, error, obtenerDetalles, abrirModalEli
             <td>{compra.id_compra}</td>
             <td>{compra.fecha_compra}</td>
             <td>{compra.nombre_empleado}</td>
-            <td>C$ {compra.total_compra.toFixed(2)}</td>
+            <td>C$ {compra.total_compra}</td>
             <td>
               <Button
                 variant="outline-success"
@@ -38,19 +34,19 @@ const TablaCompras = ({ compras, cargando, error, obtenerDetalles, abrirModalEli
                 <i className="bi bi-list-ul"></i>
               </Button>
               <Button
-                variant="outline-danger"
+                variant="outline-warning"
                 size="sm"
                 className="me-2"
-                onClick={() => abrirModalEliminacion(compra)}
+                onClick={() => abrirModalActualizacion(compra)}
               >
-                <i className="bi bi-trash"></i>
+                <i className="bi bi-pencil"></i>
               </Button>
               <Button
                 variant="outline-danger"
                 size="sm"
-                onClick={() => abrirModalActualizacion(compra)}
+                onClick={() => abrirModalEliminacion(compra)}
               >
-                <i className="bi bi-pencil"></i>
+                <i className="bi bi-trash"></i>
               </Button>
             </td>
           </tr>
