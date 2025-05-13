@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./views/Login";
 import Inicio from "./views/Inicio";
 import Encabezado from "./components/emcabezado/Encabezado";
-
+import CatalogoProductos from "./views/CatalogoProductos";
 import Productos from "./views/Productos";
 import Categorias from "./views/Categorias";
 import Clientes from "./views/Clientes";
@@ -32,6 +32,7 @@ const App = () => {
             <Route path="/compras" element={<Compras />} />
             <Route path="/usuarios" element={<Usuarios/>} />
             <Route path="/empleados" element={<Empleados/>} />
+            <Route path="/catalogoproductos" element={<CatalogoProductos/>} />
 
 
           </Routes>
