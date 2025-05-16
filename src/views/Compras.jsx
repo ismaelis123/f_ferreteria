@@ -4,12 +4,17 @@ import ModalActualizacionCompra from '../components/compras/ModalActualizacionCo
 import ModalDetallesCompra from '../components/detalles_compras/ModalDetallesCompra';
 import ModalEliminacionCompra from '../components/compras/ModalEliminacionCompra';
 import ModalRegistroCompra from '../components/compras/ModalRegistroCompra';
-import { Container, Button, Row, Col } from 'react-bootstrap';
+import { Container, Button, Row, Col, Form, Alert } from 'react-bootstrap';
+import Paginacion from '../components/ordenamiento/Paginacion'; // Assuming this component exists
 
 const Compras = () => {
   const [listaCompras, setListaCompras] = useState([]);
+  const [comprasFiltradas, setComprasFiltradas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [errorCarga, setErrorCarga] = useState(null);
+  const [filtroBusqueda, setFiltroBusqueda] = useState('');
+  const [paginaActual, setPaginaActual] = useState(1);
+  const elementosPorPagina = 5; // Display 5 purchases per page
 
   const [mostrarModal, setMostrarModal] = useState(false);
   const [detallesCompra, setDetallesCompra] = useState([]);
@@ -39,6 +44,7 @@ const Compras = () => {
       if (!respuesta.ok) throw new Error('Error al cargar las compras');
       const datos = await respuesta.json();
       setListaCompras(datos);
+      setComprasFiltradas(datos); // Initialize filtered purchases
       setCargando(false);
     } catch (error) {
       setErrorCarga(error.message);
@@ -73,6 +79,21 @@ const Compras = () => {
     obtenerEmpleados();
     obtenerProductos();
   }, []);
+
+  // Filter purchases based on search input
+  useEffect(() => {
+    const resultados = listaCompras.filter((compra) =>
+      compra.nombre_empleado.toLowerCase().includes(filtroBusqueda.toLowerCase())
+    );
+    setComprasFiltradas(resultados);
+    setPaginaActual(1); // Reset to first page when search changes
+  }, [filtroBusqueda, listaCompras]);
+
+  // Calculate paginated purchases
+  const comprasPaginadas = comprasFiltradas.slice(
+    (paginaActual - 1) * elementosPorPagina,
+    paginaActual * elementosPorPagina
+  );
 
   const obtenerDetalles = async (id_compra) => {
     setCargandoDetalles(true);
@@ -179,7 +200,7 @@ const Compras = () => {
 
   const actualizarCompra = async (compraActualizada, detalles) => {
     if (!compraActualizada.id_empleado || !compraActualizada.fecha_compra || detalles.length === 0) {
-      setErrornyireCarga("Por favor, completa todos los campos y agrega al menos un detalle.");
+      setErrorCarga("Por favor, completa todos los campos y agrega al menos un detalle.");
       return;
     }
     try {
@@ -218,14 +239,40 @@ const Compras = () => {
         </Col>
       </Row>
       <br />
+
+      {/* Search Input */}
+      <Form.Group controlId="formBusqueda" className="mb-3">
+        <div className="input-group">
+          <span className="input-group-text">
+            <i className="fas fa-search"></i>
+          </span>
+          <Form.Control
+            type="text"
+            placeholder="Buscar por nombre de empleado"
+            value={filtroBusqueda}
+            onChange={(e) => setFiltroBusqueda(e.target.value)}
+          />
+        </div>
+      </Form.Group>
+
+      {errorCarga && <Alert variant="danger">{errorCarga}</Alert>}
+
       <TablaCompras
-        compras={listaCompras}
+        compras={comprasPaginadas}
         cargando={cargando}
         error={errorCarga}
         obtenerDetalles={obtenerDetalles}
         abrirModalEliminacion={abrirModalEliminacion}
         abrirModalActualizacion={abrirModalActualizacion}
       />
+
+      <Paginacion
+        elementosPorPagina={elementosPorPagina}
+        totalElementos={comprasFiltradas.length}
+        paginaActual={paginaActual}
+        establecerPaginaActual={setPaginaActual}
+      />
+
       <ModalDetallesCompra
         mostrarModal={mostrarModal}
         setMostrarModal={setMostrarModal}

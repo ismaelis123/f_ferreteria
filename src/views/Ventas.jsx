@@ -1,18 +1,20 @@
-// Importaciones necesarias para la vista
 import React, { useState, useEffect } from 'react';
 import TablaVentas from '../components/ventas/TablaVentas';
-import ModalDetallesVenta from '../components/detalles_ventas/ModalDetallesVenta'; // Corrección de la ruta
+import ModalDetallesVenta from '../components/detalles_ventas/ModalDetallesVenta';
 import ModalActualizacionVenta from '../components/ventas/ModalActualizacionVenta';
 import ModalEliminacionVenta from '../components/ventas/ModalEliminacionVenta';
 import ModalRegistroVenta from '../components/ventas/ModalRegistroVenta';
-import { Container, Button, Row, Col } from "react-bootstrap";
+import { Container, Button, Row, Col, Form, Alert } from "react-bootstrap";
+import Paginacion from '../components/ordenamiento/Paginacion'; // Assuming this component exists
 
-// Declaración del componente Ventas
 const Ventas = () => {
-  // Estados para manejar los datos, carga y errores
   const [listaVentas, setListaVentas] = useState([]);
+  const [ventasFiltradas, setVentasFiltradas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [errorCarga, setErrorCarga] = useState(null);
+  const [filtroBusqueda, setFiltroBusqueda] = useState('');
+  const [paginaActual, setPaginaActual] = useState(1);
+  const elementosPorPagina = 5; // Display 5 sales per page
 
   const [mostrarModal, setMostrarModal] = useState(false);
   const [detallesVenta, setDetallesVenta] = useState([]);
@@ -71,7 +73,6 @@ const Ventas = () => {
         total_venta: detalles.reduce((sum, d) => sum + (d.cantidad * d.precio_unitario), 0),
         detalles
       };
-      console.log(`Enviando ID venta: ${ventaActualizada.id_venta}`, JSON.stringify(ventaData));
       const respuesta = await fetch(`http://localhost:3000/api/actualizarventa/${ventaActualizada.id_venta}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -90,16 +91,13 @@ const Ventas = () => {
 
   const eliminarVenta = async () => {
     if (!ventaAEliminar) return;
-  
     try {
       const respuesta = await fetch(`http://localhost:3000/api/eliminarventa/${ventaAEliminar.id_venta}`, {
         method: 'DELETE',
       });
-  
       if (!respuesta.ok) {
         throw new Error('Error al eliminar la venta');
       }
-      
       setMostrarModalEliminacion(false);
       await obtenerVentas();
       setVentaAEliminar(null);
@@ -108,12 +106,12 @@ const Ventas = () => {
       setErrorCarga(error.message);
     }
   };
-  
+
   const abrirModalEliminacion = (venta) => {
     setVentaAEliminar(venta);
     setMostrarModalEliminacion(true);
   };
-  
+
   const agregarDetalle = (detalle) => {
     setDetallesNuevos(prev => [...prev, detalle]);
     setNuevaVenta(prev => ({
@@ -121,13 +119,12 @@ const Ventas = () => {
       total_venta: prev.total_venta + (detalle.cantidad * detalle.precio_unitario)
     }));
   };
-  
+
   const agregarVenta = async () => {
     if (!nuevaVenta.id_cliente || !nuevaVenta.id_empleado || !nuevaVenta.fecha_venta || detallesNuevos.length === 0) {
       setErrorCarga("Por favor, completa todos los campos y agrega al menos un detalle.");
       return;
     }
-  
     try {
       const ventaData = {
         id_cliente: nuevaVenta.id_cliente,
@@ -136,15 +133,12 @@ const Ventas = () => {
         total_venta: detallesNuevos.reduce((sum, d) => sum + (d.cantidad * d.precio_unitario), 0),
         detalles: detallesNuevos
       };
-  
       const respuesta = await fetch('http://localhost:3000/api/registrarventa', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(ventaData)
       });
-  
       if (!respuesta.ok) throw new Error('Error al registrar la venta');
-  
       await obtenerVentas();
       setNuevaVenta({ id_cliente: '', id_empleado: '', fecha_venta: new Date(), total_venta: 0 });
       setDetallesNuevos([]);
@@ -165,7 +159,7 @@ const Ventas = () => {
       setErrorCarga(error.message);
     }
   };
-  
+
   const obtenerEmpleados = async () => {
     try {
       const respuesta = await fetch('http://localhost:3000/api/empleados');
@@ -176,7 +170,7 @@ const Ventas = () => {
       setErrorCarga(error.message);
     }
   };
-  
+
   const obtenerProductos = async () => {
     try {
       const respuesta = await fetch('http://localhost:3000/api/productos');
@@ -214,6 +208,7 @@ const Ventas = () => {
       }
       const datos = await respuesta.json();
       setListaVentas(datos);
+      setVentasFiltradas(datos); // Initialize filtered sales
       setCargando(false);
     } catch (error) {
       setErrorCarga(error.message);
@@ -227,6 +222,21 @@ const Ventas = () => {
     obtenerEmpleados();
     obtenerProductos();
   }, []);
+
+  // Filter sales based on search input
+  useEffect(() => {
+    const resultados = listaVentas.filter((venta) =>
+      venta.nombre_cliente.toLowerCase().includes(filtroBusqueda.toLowerCase())
+    );
+    setVentasFiltradas(resultados);
+    setPaginaActual(1); // Reset to first page when search changes
+  }, [filtroBusqueda, listaVentas]);
+
+  // Calculate paginated sales
+  const ventasPaginadas = ventasFiltradas.slice(
+    (paginaActual - 1) * elementosPorPagina,
+    paginaActual * elementosPorPagina
+  );
 
   return (
     <>
@@ -242,13 +252,37 @@ const Ventas = () => {
         </Row>
         <br />
 
+        {/* Search Input */}
+        <Form.Group controlId="formBusqueda" className="mb-3">
+          <div className="input-group">
+            <span className="input-group-text">
+              <i className="fas fa-search"></i>
+            </span>
+            <Form.Control
+              type="text"
+              placeholder="Buscar por nombre de cliente"
+              value={filtroBusqueda}
+              onChange={(e) => setFiltroBusqueda(e.target.value)}
+            />
+          </div>
+        </Form.Group>
+
+        {errorCarga && <Alert variant="danger">{errorCarga}</Alert>}
+
         <TablaVentas
-          ventas={listaVentas}
+          ventas={ventasPaginadas}
           cargando={cargando}
           error={errorCarga}
           obtenerDetalles={obtenerDetalles}
           abrirModalEliminacion={abrirModalEliminacion}
           abrirModalActualizacion={abrirModalActualizacion}
+        />
+
+        <Paginacion
+          elementosPorPagina={elementosPorPagina}
+          totalElementos={ventasFiltradas.length}
+          paginaActual={paginaActual}
+          establecerPaginaActual={setPaginaActual}
         />
 
         <ModalDetallesVenta
@@ -271,7 +305,7 @@ const Ventas = () => {
           nuevaVenta={nuevaVenta}
           setNuevaVenta={setNuevaVenta}
           detallesVenta={detallesNuevos}
-          setDetallesVenta={setDetallesNuevos} // Puedes usar setDetallesNuevos en lugar de setDetallesVenta.setDetallesVenta(detallesNuevos)
+          setDetallesVenta={setDetallesNuevos}
           agregarDetalle={agregarDetalle}
           agregarVenta={agregarVenta}
           errorCarga={errorCarga}

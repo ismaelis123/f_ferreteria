@@ -14,7 +14,7 @@ const Tarjeta = ({ indice, nombre_producto, descripcion_producto, precio_unitari
             <strong>{nombre_producto}</strong>
           </Card.Title>
           <Card.Text>{descripcion_producto || 'Sin descripción'}</Card.Text>
-          <Stack direction="horizontal" gap={2}>
+          <Stack direction="vertical" gap={2}>
             <Badge pill bg="primary">
               <i className="bi-currency-dollar"></i> {precio_unitario.toFixed(2)}
             </Badge>
