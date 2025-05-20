@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./views/Login";
 import Inicio from "./views/Inicio";
@@ -11,6 +10,7 @@ import Ventas from "./views/Ventas";
 import Compras from "./views/Compras";
 import Usuarios from "./views/Usuarios";
 import Empleados from "./views/Empleados";
+import Estadisticas from "./views/Estadisticas";
 import './App.css';
 
 
@@ -33,6 +33,8 @@ const App = () => {
             <Route path="/usuarios" element={<Usuarios/>} />
             <Route path="/empleados" element={<Empleados/>} />
             <Route path="/catalogoproductos" element={<CatalogoProductos/>} />
+            <Route path="/estadisticas" element={<Estadisticas/>} />
+            
 
 
           </Routes>
