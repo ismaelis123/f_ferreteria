@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import TablaProductos from '../components/producto/TablaProductos';
 import ModalRegistroProducto from '../components/producto/ModalRegistroProducto';
 import { Container, Button, Alert, Form } from 'react-bootstrap';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable'; // Importación explícita
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 const Productos = () => {
   const [listaProductos, setListaProductos] = useState([]);
@@ -31,6 +35,7 @@ const Productos = () => {
       const respuesta = await fetch('http://localhost:3000/api/productos');
       if (!respuesta.ok) throw new Error('Error al cargar los productos');
       const datos = await respuesta.json();
+      console.log('Datos obtenidos de la API:', datos);
       setListaProductos(datos);
       setProductosFiltrados(datos);
       setCargando(false);
@@ -61,8 +66,9 @@ const Productos = () => {
       producto.nombre_producto.toLowerCase().includes(filtroBusqueda.toLowerCase()) ||
       producto.descripcion_producto?.toLowerCase().includes(filtroBusqueda.toLowerCase())
     );
+    console.log('Productos filtrados después de búsqueda:', resultados);
     setProductosFiltrados(resultados);
-    establecerPaginaActual(1); // Resetea a la primera página al buscar
+    establecerPaginaActual(1);
   }, [filtroBusqueda, listaProductos]);
 
   const manejarCambioInput = (e) => {
@@ -138,6 +144,141 @@ const Productos = () => {
     setMostrarModal(true);
   };
 
+  const generarPDFProductos = () => {
+    try {
+      console.log('Iniciando generación de PDF. Productos filtrados:', productosFiltrados);
+      if (!productosFiltrados || productosFiltrados.length === 0) {
+        alert('No hay productos para generar el PDF.');
+        return;
+      }
+      const doc = new jsPDF();
+      console.log('jsPDF inicializado:', doc);
+      console.log('autoTable disponible:', typeof doc.autoTable === 'function');
+      
+      doc.setFillColor(0, 51, 102);
+      doc.rect(0, 0, 210, 40, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(28);
+      doc.text('Reporte de Productos', 105, 25, null, null, 'center');
+
+      const encabezados = [['ID', 'Nombre', 'Descripción', 'Categoría', 'Precio', 'Stock']];
+      const datos = productosFiltrados.map(producto => [
+        producto.id_producto || 'N/A',
+        producto.nombre_producto || 'N/A',
+        producto.descripcion_producto || 'N/A',
+        producto.id_categoria || 'N/A',
+        producto.precio_unitario || 'N/A',
+        producto.stock || 'N/A'
+      ]);
+      console.log('Datos para la tabla:', datos);
+
+      autoTable(doc, {
+        head: encabezados,
+        body: datos,
+        startY: 50,
+        theme: 'grid',
+        styles: { fontSize: 10, cellPadding: 2 },
+        headStyles: { fillColor: [0, 51, 102], textColor: [255, 255, 255] },
+        margin: { top: 50 }
+      });
+
+      const totalPaginas = doc.internal.getNumberOfPages();
+      console.log('Total de páginas:', totalPaginas);
+      const fecha = new Date().toISOString().slice(0, 10);
+      doc.save(`Productos_${fecha}.pdf`);
+      console.log('PDF generado y descargado.');
+    } catch (error) {
+      console.error('Error al generar el PDF:', error);
+      alert('Error al generar el PDF: ' + error.message);
+    }
+  };
+
+  const generarPDFDetalleProducto = (producto) => {
+    try {
+      console.log('Generando PDF para producto:', producto);
+      if (!producto) {
+        alert('No se proporcionó un producto válido.');
+        return;
+      }
+      const doc = new jsPDF();
+      console.log('jsPDF inicializado:', doc);
+      console.log('autoTable disponible:', typeof doc.autoTable === 'function');
+      
+      doc.setFillColor(0, 51, 102);
+      doc.rect(0, 0, 210, 40, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(28);
+      doc.text(`Detalle de Producto: ${producto.nombre_producto || 'N/A'}`, 105, 25, null, null, 'center');
+
+      if (producto.imagen) {
+        try {
+          console.log('Intentando agregar imagen:', producto.imagen.substring(0, 50));
+          doc.addImage(`data:image/png;base64,${producto.imagen}`, 'PNG', 10, 50, 50, 50);
+        } catch (error) {
+          console.error('Error al agregar la imagen:', error);
+        }
+      } else {
+        console.log('No hay imagen para este producto.');
+      }
+
+      const datos = [
+        ['ID', producto.id_producto || 'N/A'],
+        ['Nombre', producto.nombre_producto || 'N/A'],
+        ['Descripción', producto.descripcion_producto || 'N/A'],
+        ['Categoría', producto.id_categoria || 'N/A'],
+        ['Precio', producto.precio_unitario || 'N/A'],
+        ['Stock', producto.stock || 'N/A']
+      ];
+      console.log('Datos para la tabla de detalle:', datos);
+
+      autoTable(doc, {
+        body: datos,
+        startY: producto.imagen ? 110 : 50,
+        theme: 'grid',
+        styles: { fontSize: 10, cellPadding: 2 },
+        headStyles: { fillColor: [0, 51, 102], textColor: [255, 255, 255] }
+      });
+
+      const fecha = new Date().toISOString().slice(0, 10);
+      doc.save(`Producto_${producto.nombre_producto || 'SinNombre'}_${fecha}.pdf`);
+      console.log('PDF de detalle generado y descargado.');
+    } catch (error) {
+      console.error('Error al generar el PDF de detalle:', error);
+      alert('Error al generar el PDF de detalle: ' + error.message);
+    }
+  };
+
+  const exportarExcelProductos = () => {
+    try {
+      console.log('Productos filtrados para Excel:', productosFiltrados);
+      if (!productosFiltrados || productosFiltrados.length === 0) {
+        alert('No hay productos para generar el Excel.');
+        return;
+      }
+      const datos = productosFiltrados.map(producto => ({
+        ID: producto.id_producto || 'N/A',
+        Nombre: producto.nombre_producto || 'N/A',
+        Descripción: producto.descripcion_producto || 'N/A',
+        Categoría: producto.id_categoria || 'N/A',
+        Precio: producto.precio_unitario || 'N/A',
+        Stock: producto.stock || 'N/A'
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(datos);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Productos');
+
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const nombreArchivo = `Productos_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+      saveAs(blob, nombreArchivo);
+      console.log('Excel generado y descargado.');
+    } catch (error) {
+      console.error('Error al generar el Excel:', error);
+      alert('Error al generar el Excel: ' + error.message);
+    }
+  };
+
   // Calcular productos paginados
   const productosPaginados = productosFiltrados.slice(
     (paginaActual - 1) * elementosPorPagina,
@@ -157,6 +298,22 @@ const Productos = () => {
         }}
       >
         Nuevo Producto
+      </Button>
+      <Button
+        variant="secondary"
+        className="ms-2"
+        onClick={generarPDFProductos}
+        style={{ width: '150px' }}
+      >
+        Generar reporte PDF
+      </Button>
+      <Button
+        variant="secondary"
+        className="ms-2"
+        onClick={exportarExcelProductos}
+        style={{ width: '150px' }}
+      >
+        Generar Excel
       </Button>
 
       <Form.Group controlId="formBusqueda" className="mt-3 mb-3">
@@ -185,6 +342,7 @@ const Productos = () => {
         elementosPorPagina={elementosPorPagina}
         paginaActual={paginaActual}
         establecerPaginaActual={establecerPaginaActual}
+        generarPDFDetalleProducto={generarPDFDetalleProducto}
       />
 
       <ModalRegistroProducto

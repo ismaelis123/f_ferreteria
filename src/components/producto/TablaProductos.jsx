@@ -13,7 +13,8 @@ const TablaProductos = ({
   totalElementos,
   elementosPorPagina,
   paginaActual,
-  establecerPaginaActual
+  establecerPaginaActual,
+  generarPDFDetalleProducto
 }) => {
   // Renderizado condicional según el estado recibido por props
   if (cargando) {
@@ -60,6 +61,17 @@ const TablaProductos = ({
                 )}
               </td>
               <td>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => {
+                    console.log('Botón PDF clicado para producto:', producto);
+                    generarPDFDetalleProducto(producto);
+                  }}
+                  className="me-1"
+                >
+                  <i className="fas fa-file-pdf"></i>
+                </Button>
                 <Button
                   variant="warning"
                   size="sm"
