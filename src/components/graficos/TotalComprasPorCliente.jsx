@@ -1,13 +1,46 @@
-import React from 'react';
-import { Card } from 'react-bootstrap';
+import React, { useRef } from 'react'; // Added useRef
+import { Card, Button } from 'react-bootstrap'; // Added Button
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import jsPDF from 'jspdf'; // Added jsPDF
+import autoTable from 'jspdf-autotable'; // Added autoTable
 
 // Register Chart.js components and datalabels plugin
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 const TotalComprasPorCliente = ({ clientes, totales_por_cliente }) => {
+  // Added chart reference
+  const chartRef = useRef(null);
+
+  // Added PDF generation function
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(18);
+    doc.setTextColor(40);
+    doc.text("Total Compras por Cliente Report", 14, 20);
+
+    // Add chart image to PDF
+    const chart = chartRef.current;
+    if (chart) {
+      const canvas = chart.canvas;
+      const imgData = canvas.toDataURL('image/png');
+      doc.addImage(imgData, 'PNG', 10, 30, 190, 100); // Adjusted dimensions
+    }
+
+    // Add table with autoTable
+    autoTable(doc, {
+      startY: 140,
+      head: [['Cliente', 'Compras (C$)']],
+      body: clientes.map((cliente, index) => [cliente, totales_por_cliente[index]?.toFixed(2) || '0.00']),
+    });
+
+    // Save the PDF
+    doc.save('total_compras_por_cliente.pdf');
+  };
+
   // Validate inputs
   const validClientes = Array.isArray(clientes) && clientes.length > 0 ? clientes : ['Sin datos'];
   const validTotales = Array.isArray(totales_por_cliente) && totales_por_cliente.length > 0
@@ -124,7 +157,14 @@ const TotalComprasPorCliente = ({ clientes, totales_por_cliente }) => {
           </div>
         ) : (
           <div style={{ height: '350px', maxWidth: '450px', margin: '0 auto' }}>
-            <Doughnut data={data} options={options} />
+            <Doughnut data={data} options={options} ref={chartRef} /> {/* Added ref */}
+            <Button
+              variant="primary"
+              onClick={generatePDF}
+              style={{ marginTop: '15px', width: '100%' }}
+            >
+              Generar PDF
+            </Button> {/* Added button */}
           </div>
         )}
       </Card.Body>
