@@ -15,7 +15,7 @@ const ModalRegistroCompra = ({
   agregarCompra,
   errorCarga,
   empleados,
-  productos
+  productos,
 }) => {
   const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState(null);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
@@ -24,55 +24,59 @@ const ModalRegistroCompra = ({
   const totalCompra = detallesCompra.reduce((sum, detalle) => sum + (detalle.cantidad * detalle.precio_unitario), 0);
 
   const cargarEmpleados = (inputValue, callback) => {
-    const filtrados = empleados.filter(empleado =>
+    const filtrados = empleados.filter((empleado) =>
       `${empleado.primer_nombre} ${empleado.primer_apellido}`.toLowerCase().includes(inputValue.toLowerCase())
     );
-    callback(filtrados.map(empleado => ({
-      value: empleado.id_empleado,
-      label: `${empleado.primer_nombre} ${empleado.primer_apellido}`
-    })));
+    callback(
+      filtrados.map((empleado) => ({
+        value: empleado.id_empleado,
+        label: `${empleado.primer_nombre} ${empleado.primer_apellido}`,
+      }))
+    );
   };
 
   const cargarProductos = (inputValue, callback) => {
-    const filtrados = productos.filter(producto =>
+    const filtrados = productos.filter((producto) =>
       producto.nombre_producto.toLowerCase().includes(inputValue.toLowerCase())
     );
-    callback(filtrados.map(producto => ({
-      value: producto.id_producto,
-      label: producto.nombre_producto,
-      precio: producto.precio_unitario
-    })));
+    callback(
+      filtrados.map((producto) => ({
+        value: producto.id_producto,
+        label: producto.nombre_producto,
+        precio: producto.precio_unitario,
+      }))
+    );
   };
 
   const manejarCambioEmpleado = (seleccionado) => {
     setEmpleadoSeleccionado(seleccionado);
-    setNuevaCompra(prev => ({ ...prev, id_empleado: seleccionado ? seleccionado.value : '' }));
+    setNuevaCompra((prev) => ({ ...prev, id_empleado: seleccionado ? seleccionado.value : '' }));
   };
 
   const manejarCambioProducto = (seleccionado) => {
     setProductoSeleccionado(seleccionado);
-    setNuevoDetalle(prev => ({
+    setNuevoDetalle((prev) => ({
       ...prev,
       id_producto: seleccionado ? seleccionado.value : '',
-      precio_unitario: seleccionado ? seleccionado.precio : ''
+      precio_unitario: seleccionado ? seleccionado.precio : '',
     }));
   };
 
   const manejarCambioDetalle = (e) => {
     const { name, value } = e.target;
-    setNuevoDetalle(prev => ({ ...prev, [name]: value }));
+    setNuevoDetalle((prev) => ({ ...prev, [name]: value }));
   };
 
   const manejarAgregarDetalle = () => {
-    if (!nuevoDetalle.id_producto || !nuevoDetalle.cantidad || nuevoDetalle.cantidad <= 0) {
-      alert('Por favor, selecciona un producto y una cantidad válida.');
+    if (!nuevoDetalle.id_producto || !nuevoDetalle.cantidad || nuevoDetalle.cantidad <= 0 || !nuevoDetalle.precio_unitario) {
+      alert('Por favor, selecciona un producto, una cantidad válida y un precio unitario.');
       return;
     }
     agregarDetalle({
       id_producto: nuevoDetalle.id_producto,
-      nombre_producto: productoSeleccionado.label,
+      nombre_producto: productoSeleccionado?.label || 'N/A',
       cantidad: parseInt(nuevoDetalle.cantidad),
-      precio_unitario: parseFloat(nuevoDetalle.precio_unitario)
+      precio_unitario: parseFloat(nuevoDetalle.precio_unitario),
     });
     setNuevoDetalle({ id_producto: '', cantidad: '', precio_unitario: '' });
     setProductoSeleccionado(null);
@@ -106,7 +110,7 @@ const ModalRegistroCompra = ({
                 <br />
                 <DatePicker
                   selected={nuevaCompra.fecha_compra}
-                  onChange={(date) => setNuevaCompra(prev => ({ ...prev, fecha_compra: date }))}
+                  onChange={(date) => setNuevaCompra((prev) => ({ ...prev, fecha_compra: date }))}
                   className="form-control"
                   dateFormat="dd/MM/yyyy HH:mm"
                   showTimeSelect
@@ -157,11 +161,13 @@ const ModalRegistroCompra = ({
                   value={nuevoDetalle.precio_unitario}
                   onChange={manejarCambioDetalle}
                   placeholder="Precio"
+                  step="0.01"
+                  min="0"
                   required
                 />
               </Form.Group>
             </Col>
-            <Col xs={5} sm={4} md={2} lg={2} className="d-flex align-items-center mt-3">
+            <Col xs={5} sm={4} md={2} lg={2} className="d-flex align-items-end mb-3">
               <Button style={{ width: '100%' }} variant="success" onClick={manejarAgregarDetalle}>
                 Agregar Producto
               </Button>
@@ -182,17 +188,21 @@ const ModalRegistroCompra = ({
                 <tbody>
                   {detallesCompra.map((detalle, index) => (
                     <tr key={index}>
-                      <td>{detalle.nombre_producto}</td>
-                      <td>{detalle.cantidad}</td>
-                      <td>{detalle.precio_unitario.toFixed(2)}</td>
-                      <td>{(detalle.cantidad * detalle.precio_unitario).toFixed(2)}</td>
+                      <td>{detalle.nombre_producto || 'N/A'}</td>
+                      <td>{detalle.cantidad || 0}</td>
+                      <td>{detalle.precio_unitario?.toFixed(2) || '0.00'}</td>
+                      <td>{((detalle.cantidad || 0) * (detalle.precio_unitario || 0)).toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
                   <tr>
-                    <td colSpan="3" className="text-end"><strong>Total:</strong></td>
-                    <td><strong>{totalCompra.toFixed(2)}</strong></td>
+                    <td colSpan="3" className="text-end">
+                      <strong>Total:</strong>
+                    </td>
+                    <td>
+                      <strong>{totalCompra.toFixed(2)}</strong>
+                    </td>
                   </tr>
                 </tfoot>
               </Table>

@@ -8,9 +8,9 @@ const ModalDetallesCompra = ({ mostrarModal, setMostrarModal, detalles, cargando
         <Modal.Title>Detalles de la Compra</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {cargandoDetalles && <div>Cargando detalles...</div>}
-        {errorDetalles && <div className="text-danger">Error: {errorDetalles}</div>}
-        {!cargandoDetalles && !errorDetalles && detalles.length > 0 && (
+        {cargandoDetalles && <div className="text-center">Cargando detalles...</div>}
+        {errorDetalles && <div className="text-danger text-center">Error: {errorDetalles}</div>}
+        {!cargandoDetalles && !errorDetalles && detalles?.length > 0 && (
           <Table striped bordered hover>
             <thead>
               <tr>
@@ -23,17 +23,17 @@ const ModalDetallesCompra = ({ mostrarModal, setMostrarModal, detalles, cargando
             <tbody>
               {detalles.map((detalle, index) => (
                 <tr key={index}>
-                  <td>{detalle.nombre_producto}</td>
-                  <td>{detalle.cantidad}</td>
-                  <td>{detalle.precio_unitario.toFixed(2)}</td>
-                  <td>{(detalle.cantidad * detalle.precio_unitario).toFixed(2)}</td>
+                  <td>{detalle.nombre_producto || 'N/A'}</td>
+                  <td>{detalle.cantidad || 0}</td>
+                  <td>{detalle.precio_unitario?.toFixed(2) || '0.00'}</td>
+                  <td>{((detalle.cantidad || 0) * (detalle.precio_unitario || 0)).toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>
           </Table>
         )}
-        {!cargandoDetalles && !errorDetalles && detalles.length === 0 && (
-          <div>No hay detalles para esta compra.</div>
+        {!cargandoDetalles && !errorDetalles && (!detalles || detalles.length === 0) && (
+          <div className="text-center">No hay detalles para esta compra.</div>
         )}
       </Modal.Body>
       <Modal.Footer>

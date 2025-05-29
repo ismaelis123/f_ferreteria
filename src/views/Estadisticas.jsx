@@ -1,8 +1,10 @@
+// src/views/Estadisticas.jsx
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Alert } from 'react-bootstrap';
-import VentasPorMes from '../components/graficos/VentasPorMes'; // Adjust path as needed
-import VentasPorEmpleado from '../components/graficos/VentasPorEmpleado'; // Adjust path as needed
-import TotalComprasPorCliente from '../components/graficos/TotalComprasPorCliente'; // Adjust path as needed
+import { Container, Row, Col, Alert, Button } from 'react-bootstrap'; // Añadimos Button
+import VentasPorMes from '../components/graficos/VentasPorMes';
+import VentasPorEmpleado from '../components/graficos/VentasPorEmpleado';
+import TotalComprasPorCliente from '../components/graficos/TotalComprasPorCliente';
+import ChatIA from '../components/chat/ChatIA'; // Importamos ChatIA
 
 const Estadisticas = () => {
   const [meses, setMeses] = useState([]);
@@ -12,6 +14,7 @@ const Estadisticas = () => {
   const [clientes, setClientes] = useState([]);
   const [totalesPorCliente, setTotalesPorCliente] = useState([]);
   const [error, setError] = useState(null);
+  const [mostrarChatModal, setMostrarChatModal] = useState(false); // Estado para el modal
 
   useEffect(() => {
     const cargaVentas = async () => {
@@ -124,6 +127,9 @@ const Estadisticas = () => {
   return (
     <Container className="mt-5">
       <h4>Estadísticas</h4>
+      <Button variant="primary" onClick={() => setMostrarChatModal(true)}>
+        Consultar con IA
+      </Button>
       {error && <Alert variant="danger">{error}</Alert>}
       <Row className="mt-4">
         <Col xs={12} md={6} lg={4} className="mb-4">
@@ -136,6 +142,10 @@ const Estadisticas = () => {
           <TotalComprasPorCliente clientes={clientes} totales_por_cliente={totalesPorCliente} />
         </Col>
       </Row>
+      <ChatIA
+        mostrarChatModal={mostrarChatModal}
+        setMostrarChatModal={setMostrarChatModal}
+      />
     </Container>
   );
 };
