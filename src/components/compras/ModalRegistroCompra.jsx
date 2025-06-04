@@ -10,6 +10,7 @@ const ModalRegistroCompra = ({
   nuevaCompra,
   setNuevaCompra,
   detallesCompra,
+  // eslint-disable-next-line no-unused-vars
   setDetallesCompra,
   agregarDetalle,
   agregarCompra,
