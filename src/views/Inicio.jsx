@@ -1,6 +1,9 @@
+// src/components/inicio/Inicio.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container } from "react-bootstrap";
+import { Container, Image } from "react-bootstrap";
+import Portada from "../assets/portada.jpg";
+import Proposito from "../components/inicio/Proposito";
 
 const Inicio = () => {
   const [nombreUsuario, setNombreUsuario] = useState("");
@@ -9,7 +12,7 @@ const Inicio = () => {
   useEffect(() => {
     const usuarioGuardado = localStorage.getItem("usuario");
     if (!usuarioGuardado) {
-      navegar("/");
+      navegar("/login");
     } else {
       setNombreUsuario(usuarioGuardado);
     }
@@ -17,15 +20,19 @@ const Inicio = () => {
 
   const cerrarSesion = () => {
     localStorage.removeItem("usuario");
-    localStorage.removeItem("contraseña");
-    navegar("/");
+    localStorage.removeItem("contrasena");
+    navegar("/login");
   };
 
   return (
     <Container>
-      <h1>¡Bienvenido, {nombreUsuario}!</h1>
+      <h1 className="text-center m-4">¡Bienvenido, {nombreUsuario}!</h1>
+      <Image src={Portada} fluid rounded />
       <p>Estás en la página de inicio.</p>
-      <button onClick={cerrarSesion}>Cerrar Sesión</button>
+      <Proposito />
+      <button onClick={cerrarSesion} className="btn btn-danger">
+        Cerrar Sesión
+      </button>
     </Container>
   );
 };

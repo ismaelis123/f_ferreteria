@@ -1,97 +1,209 @@
-import React, { useState, useEffect } from 'react';
-import { Navbar, Nav, Container, Dropdown } from 'react-bootstrap';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Container, Nav, Navbar, Offcanvas } from "react-bootstrap";
+import logo from "../../assets/logo.png"; // Importación del logo de la ferretería
+import "bootstrap-icons/font/bootstrap-icons.css"; // Importación de íconos de Bootstrap
+import NavDropdown from "react-bootstrap/NavDropdown";
+import "../../App.css";
+
+// Estilos personalizados de la aplicación
 
 const Encabezado = () => {
-  const [showDropdown, setShowDropdown] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
+  // Estado para controlar el colapso del menú lateral
+  const [estaColapsado, setEstaColapsado] = useState(false);
+  
+  // Hook para manejar la navegación entre rutas
+  const navegar = useNavigate();
+  
+  // Hook para obtener la ubicación actual de la ruta
+  // eslint-disable-next-line no-unused-vars
+  const ubicacion = useLocation();
 
-  // Check if user is logged in on component mount
-  useEffect(() => {
-    const usuario = localStorage.getItem('usuario');
-    const contraseña = localStorage.getItem('contraseña');
-    if (!usuario || !contraseña) {
-      // Redirect to login page if not logged in, except if already on login page
-      if (location.pathname !== '/') {
-        navigate('/');
-      }
-    }
-  }, [navigate, location.pathname]);
+  // Validación del estado de autenticación con localStorage
+  const estaLogueado = !!localStorage.getItem("usuario") && !!localStorage.getItem("contraseña");
 
-  // Handle logout
+  // Función para cerrar sesión
   const cerrarSesion = () => {
-    localStorage.removeItem('usuario');
-    localStorage.removeItem('contraseña');
-    navigate('/');
+    setEstaColapsado(false); // Cierra el menú lateral
+    localStorage.removeItem("usuario"); // Elimina el usuario de localStorage
+    localStorage.removeItem("contraseña"); // Elimina la contraseña de localStorage
+    navegar("/"); // Redirige a la página principal
   };
 
-  // Check if user is logged in
-  const isLoggedIn = () => {
-    return localStorage.getItem('usuario') && localStorage.getItem('contraseña');
+  // Función para alternar el estado del menú lateral
+  const alternarColapso = () => setEstaColapsado(!estaColapsado);
+
+  // Función genérica de navegación
+  const navegarA = (ruta) => {
+    navegar(ruta); // Navega a la ruta especificada
+    setEstaColapsado(false); // Cierra el menú lateral
   };
 
   return (
-    <Navbar bg="dark" variant="dark" expand="lg" fixed="top">
+    // Barra de navegación fija en la parte superior
+    <Navbar expand="sm" fixed="top" className="color-navbar">
       <Container>
-        <Navbar.Brand as={Link} to={isLoggedIn() ? '/inicio' : '/'}>
-          FERRETERIA YUSSI
+        {/* Logo y nombre de la ferretería */}
+        <Navbar.Brand
+          onClick={() => navegarA("/inicio")}
+          className="text-white"
+          style={{ cursor: "pointer" }}
+        >
+          <img alt="" src={logo} width="30" height="30" className="d-inline-block align-top" />{" "}
+          <strong>FERRETERIA LOS MEROS YUSII MI CHAK</strong>
         </Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" disabled={!isLoggedIn()} />
-        <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="ms-auto">
-            {/* Menú Button with Dropdown */}
-            <Dropdown show={showDropdown} onToggle={() => setShowDropdown(!showDropdown)} disabled={!isLoggedIn()}>
-              <Dropdown.Toggle variant="primary" id="dropdown-menu" disabled={!isLoggedIn()}>
-                Menú
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                {/* Navigation Links */}
-                <Dropdown.Item as={Link} to="/inicio" disabled={!isLoggedIn()}>
-                  Inicio
-                </Dropdown.Item>
-                <Dropdown.Item as={Link} to="/productos" disabled={!isLoggedIn()}>
-                  Productos
-                </Dropdown.Item>
-                <Dropdown.Item as={Link} to="/categorias" disabled={!isLoggedIn()}>
-                  Categorías
-                </Dropdown.Item>
-                <Dropdown.Item as={Link} to="/clientes" disabled={!isLoggedIn()}>
-                  Clientes
-                </Dropdown.Item>
-                <Dropdown.Item as={Link} to="/ventas" disabled={!isLoggedIn()}>
-                  Ventas
-                </Dropdown.Item>
-                <Dropdown.Item as={Link} to="/compras" disabled={!isLoggedIn()}>
-                  Compras
-                </Dropdown.Item>
-                <Dropdown.Item as={Link} to="/usuarios" disabled={!isLoggedIn()}>
-                  Usuarios
-                </Dropdown.Item>
-                <Dropdown.Item as={Link} to="/empleados" disabled={!isLoggedIn()}>
-                  Empleados
-                </Dropdown.Item>
-                <Dropdown.Item as={Link} to="/catalogoProductos" disabled={!isLoggedIn()}>
-                  Catálogo
-                </Dropdown.Item>
-                <Dropdown.Item as={Link} to="/estadisticas" disabled={!isLoggedIn()}>
-                  Estadísticas
-                </Dropdown.Item>
-                <Dropdown.Item as={Link} to="/Dashboard" disabled={!isLoggedIn()}>
-                  Dashboard
-                </Dropdown.Item>
 
-                <Dropdown.Divider />
+        {/* Botón para alternar el menú lateral en pantallas pequeñas */}
+        <Navbar.Toggle
+          aria-controls="offcanvasNavbar-expand-sm"
+          onClick={alternarColapso}
+        />
 
-                {/* Logout Option */}
-                <Dropdown.Item onClick={cerrarSesion} disabled={!isLoggedIn()}>
-                  Cerrar Sesión
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
-          </Nav>
-        </Navbar.Collapse>
+        {/* Menú lateral (Offcanvas) */}
+        <Navbar.Offcanvas
+          id="offcanvasNavbar-expand-sm"
+          aria-labelledby="offcanvasNavbarLabel-expand-sm"
+          placement="end"
+          show={estaColapsado}
+          onHide={() => setEstaColapsado(false)}
+        >
+          {/* Encabezado del menú lateral */}
+          <Offcanvas.Header closeButton>
+            <Offcanvas.Title
+              id="offcanvasNavbarLabel-expand-sm"
+              className={estaColapsado ? "color-texto-marca" : "text-white"}
+            >
+              Menú
+            </Offcanvas.Title>
+          </Offcanvas.Header>
+
+          {/* Cuerpo del menú lateral */}
+          <Offcanvas.Body>
+            {/* Navegación */}
+  <Nav className="justify-content-end flex-grow-1 pe-3">
+    {estaLogueado ? (
+      <>
+        <Nav.Link
+          onClick={() => navegarA("/inicio")}
+          className={estaColapsado ? "text-black" : "text-white"}
+        >
+          {estaColapsado && <i className="bi-house-door-fill me-2"></i>}
+          <strong>Inicio</strong>
+        </Nav.Link>
+
+        <Nav.Link
+          onClick={() => navegarA("/ventas")}
+          className={estaColapsado ? "text-black" : "text-white"}
+        >
+          {estaColapsado && <i className="bi-cash-coin me-2"></i>}
+          <strong>Ventas</strong>
+        </Nav.Link>
+
+        <Nav.Link
+          onClick={() => navegarA("/compras")}
+          className={estaColapsado ? "text-black" : "text-white"}
+        >
+          {estaColapsado && <i className="bi-cart-check me-2"></i>}
+          <strong>Compras</strong>
+        </Nav.Link>
+
+        <Nav.Link
+          onClick={() => navegarA("/Estadisticas")}
+          className={estaColapsado ? "text-black" : "text-white"}
+        >
+          {estaColapsado && <i className="bi-graph-up me-2"></i>}
+          <strong>Estadísticas</strong>
+        </Nav.Link>
+
+        <Nav.Link
+          onClick={() => navegarA("/Dashboard")}
+          className={estaColapsado ? "text-black" : "text-white"}
+        >
+          {estaColapsado && <i className="bi-speedometer2 me-2"></i>}
+          <strong>Dashboard</strong>
+        </Nav.Link>
+
+        <NavDropdown
+          title={
+            <span>
+              {estaColapsado && <i className="bi-folder-fill me-2"></i>}
+              Registros
+            </span>
+          }
+          id="dropdown-registros"
+          className={estaColapsado ? "titulo-negro" : "titulo-blanco"}
+        >
+          <NavDropdown.Item
+            onClick={() => navegarA("/usuarios")}
+            className="text-black"
+          >
+            <strong>Gestión Usuarios</strong>
+          </NavDropdown.Item>
+          <NavDropdown.Item
+            onClick={() => navegarA("/clientes")}
+            className="text-black"
+          >
+            <strong>Gestión Clientes</strong>
+          </NavDropdown.Item>
+          <NavDropdown.Item
+            onClick={() => navegarA("/empleados")}
+            className="text-black"
+          >
+            <strong>Gestión Empleados</strong>
+          </NavDropdown.Item>
+        </NavDropdown>
+
+        <NavDropdown
+          title={
+            <span>
+              {estaColapsado && <i className="bi-box-fill me-2"></i>}
+              Productos
+            </span>
+          }
+          id="dropdown-productos"
+          className={estaColapsado ? "titulo-negro" : "titulo-blanco"}
+        >
+          <NavDropdown.Item
+            onClick={() => navegarA("/productos")}
+            className="text-black"
+          >
+            <strong>Gestión Productos</strong>
+          </NavDropdown.Item>
+          <NavDropdown.Item
+            onClick={() => navegarA("/categorias")}
+            className="text-black"
+          >
+            <strong>Gestión Categorías</strong>
+          </NavDropdown.Item>
+          <NavDropdown.Item
+            onClick={() => navegarA("/catalogoproductos")}
+            className="text-black"
+          >
+            <strong>Catálogo Productos</strong>
+          </NavDropdown.Item>
+        </NavDropdown>
+
+        <Nav.Link
+          onClick={cerrarSesion}
+          className={estaColapsado ? "text-black" : "text-white"}
+        >
+          <i className="bi-box-arrow-right me-2"></i>
+          <strong>Cerrar Sesión</strong>
+        </Nav.Link>
+      </>
+    ) : (
+      <Nav.Link
+        onClick={() => navegarA("/")}
+        className={estaColapsado ? "text-black" : "text-white"}
+      >
+        <i className="bi-box-arrow-in-right me-2"></i>
+        <strong>Iniciar Sesión</strong>
+      </Nav.Link>
+    )}
+  </Nav>
+</Offcanvas.Body>
+
+        </Navbar.Offcanvas>
       </Container>
     </Navbar>
   );

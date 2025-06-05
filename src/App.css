@@ -1,6 +1,6 @@
 /* Estilos para el navbar */
 .color-navbar {
-  background: linear-gradient(225deg, #14c941 0%, #e4a017 50%, #219ff3 100%);
+  background: linear-gradient(225deg, #3b14c9 0%, #e41717 50%, #219ff3 100%);
   padding: 12px 0;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
   border-bottom: 2px solid rgba(255, 255, 255, 0.2);
@@ -49,7 +49,7 @@ main {
   background: rgba(255, 255, 255, 0.95);
   padding: 25px;
   border-radius: 12px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 12px rgba(16, 16, 16, 0.15);
 }
 
 /* Estilos para la tabla */
@@ -76,7 +76,7 @@ table th {
 
 table td {
   background: #fafafa;
-  color: #333;
+  color: #070707;
 }
 
 /* Estilo para botones */
