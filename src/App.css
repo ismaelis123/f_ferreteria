@@ -1,7 +1,7 @@
 /* Estilos para el navbar */
 .color-navbar {
-  background: linear-gradient(225deg, #3b14c9 0%, #e41717 50%, #219ff3 100%);
-  padding: 12px 0;
+  background: linear-gradient(225deg, #0ca4eb 0%, #17e4c5 50%, #219ff3 100%);
+  padding: 10px 0;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
   border-bottom: 2px solid rgba(255, 255, 255, 0.2);
 }
